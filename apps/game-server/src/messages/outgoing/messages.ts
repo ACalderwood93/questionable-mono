@@ -1,5 +1,5 @@
-import { UUID } from "crypto";
-import { Question } from "../../types/question";
+import type { UUID } from "node:crypto";
+import type { Question } from "../../types/question.js";
 
 export type setUserIdMessage = {
   event: "setUserId";

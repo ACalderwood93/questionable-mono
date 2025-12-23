@@ -1,5 +1,5 @@
 {
-  "name": "@repo/web",
+  "name": "@repo/game-server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,8 @@
     "build": "tsc",
     "dev": "tsx watch src/server.ts",
     "lint": "biome check .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "@types/ws": "^8.18.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.16"
   }
 }
