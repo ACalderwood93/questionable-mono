@@ -1,7 +1,8 @@
-import { UUID } from "crypto";
-import { Question } from "./question";
+import type { UUID } from "node:crypto";
+import type { Question } from "./question.js";
 
 export type Game = {
+  id: UUID;
   lobbyId: string;
   players: Player[];
   createdAt: Date;

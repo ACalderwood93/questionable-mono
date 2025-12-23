@@ -1,4 +1,4 @@
-import { UUID } from "crypto";
+import type { UUID } from "node:crypto";
 
 export type Question = {
   id: UUID;
