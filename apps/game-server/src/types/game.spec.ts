@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { Game } from "./game.js";
-import { MAX_PLAYERS, MIN_PLAYERS } from "../constants.js";
+import { MAX_PLAYERS } from "../constants.js";
 import { createAllQuestionsAndAnswers } from "../factories/questionFactory.js";
+import { Game } from "./game.js";
 
 describe("Game", () => {
   let game: Game;
@@ -9,13 +9,7 @@ describe("Game", () => {
 
   beforeEach(() => {
     const [questions, answers] = createAllQuestionsAndAnswers(10);
-    game = new Game(
-      crypto.randomUUID(),
-      TEST_LOBBY_ID,
-      [],
-      questions,
-      answers
-    );
+    game = new Game(crypto.randomUUID(), TEST_LOBBY_ID, [], questions, answers);
   });
 
   describe("canStart", () => {
@@ -111,4 +105,3 @@ describe("Game", () => {
     });
   });
 });
-
