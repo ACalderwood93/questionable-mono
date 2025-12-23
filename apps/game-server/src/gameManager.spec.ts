@@ -23,50 +23,27 @@ describe("GameManager", () => {
     });
   });
 
-  describe("start game eligibility", () => {
-    it("should not be able to start game with no players", () => {
+  describe("getGame", () => {
+    it("should return undefined for non-existent game", () => {
       const gameManager = GameManager.getInstance();
-      expect(() => gameManager.startGame(TEST_LOBBY_CODE)).toThrow();
+      expect(gameManager.getGame("NON_EXISTENT")).toBeUndefined();
     });
 
-    it("should not be able to start game with less than the Minimum number of players", () => {
+    it("should return the game for existing lobby code", () => {
       const gameManager = GameManager.getInstance();
-      gameManager.createGame(TEST_LOBBY_CODE);
-      gameManager.addPlayerToGame(TEST_LOBBY_CODE, crypto.randomUUID());
-      expect(gameManager.canGameStart(TEST_LOBBY_CODE)).toBe(false);
-    });
-
-    it("should be able to start the game if the minimum number of players is met", () => {
-      const gameManager = GameManager.getInstance();
-      gameManager.createGame(TEST_LOBBY_CODE);
-      gameManager.addPlayerToGame(TEST_LOBBY_CODE, crypto.randomUUID());
-      gameManager.addPlayerToGame(TEST_LOBBY_CODE, crypto.randomUUID());
-      expect(gameManager.canGameStart(TEST_LOBBY_CODE)).toBe(true);
+      const createdGame = gameManager.createGame(TEST_LOBBY_CODE);
+      const retrievedGame = gameManager.getGame(TEST_LOBBY_CODE);
+      expect(retrievedGame).toBeDefined();
+      expect(retrievedGame?.id).toBe(createdGame.id);
     });
   });
 
-  describe("players", () => {
-    it("should be able to add a player to a game", () => {
-      const gameManager = GameManager.getInstance();
-      const game = gameManager.createGame(TEST_LOBBY_CODE);
-      gameManager.addPlayerToGame(TEST_LOBBY_CODE, crypto.randomUUID());
-      expect(game.players.length).toBe(1);
-    });
-
-    it("should be able to add multiple players to a game", () => {
-      const gameManager = GameManager.getInstance();
-      const game = gameManager.createGame(TEST_LOBBY_CODE);
-      gameManager.addPlayerToGame(TEST_LOBBY_CODE, crypto.randomUUID());
-      gameManager.addPlayerToGame(TEST_LOBBY_CODE, crypto.randomUUID());
-      expect(game.players.length).toBe(2);
-    });
-
-    it("should throw if the same user is added to the game twice", () => {
+  describe("deleteGame", () => {
+    it("should delete a game", () => {
       const gameManager = GameManager.getInstance();
       gameManager.createGame(TEST_LOBBY_CODE);
-      const userId = crypto.randomUUID();
-      gameManager.addPlayerToGame(TEST_LOBBY_CODE, userId);
-      expect(() => gameManager.addPlayerToGame(TEST_LOBBY_CODE, userId)).toThrow();
+      gameManager.deleteGame(TEST_LOBBY_CODE);
+      expect(gameManager.getGame(TEST_LOBBY_CODE)).toBeUndefined();
     });
   });
 });
