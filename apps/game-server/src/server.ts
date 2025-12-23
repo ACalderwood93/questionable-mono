@@ -31,10 +31,10 @@ wss.on("connection", (ws, req: IncomingMessage) => {
 
     ws.send(createSetUserIdMessage(userId));
 
-    gameManager.addPlayerToGame(lobby, userId);
+    game.addPlayer(userId);
 
-    if (gameManager.canGameStart(lobby)) {
-      gameManager.startGame(lobby);
+    if (game.canStart()) {
+      game.start();
       const firstQuestion = game.questions[0];
       if (firstQuestion) {
         ws.send(createAskQuestionMessage(firstQuestion));
@@ -47,7 +47,8 @@ wss.on("connection", (ws, req: IncomingMessage) => {
 
     ws.on("close", () => {
       console.log("Client disconnected");
-      gameManager.removePlayerFromGame(lobby, userId);
+
+      game.removePlayer(userId);
     });
 
     ws.on("error", (error) => {
