@@ -4,6 +4,8 @@ export type Question = {
   id: UUID;
   text: string;
   answers: Answer[];
+  // map userId to answerId
+  providedAnswers: Map<UUID, Answer>;
 };
 
 export type Answer = {

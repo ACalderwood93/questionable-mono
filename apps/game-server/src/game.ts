@@ -1,6 +1,7 @@
 import type { UUID } from "node:crypto";
-import { MAX_PLAYERS, MIN_PLAYERS } from "../constants.js";
-import type { Question } from "./question.js";
+import Emittery from "emittery";
+import { MAX_PLAYERS, MIN_PLAYERS } from "./constants.js";
+import type { Question } from "./types/question.js";
 
 export type Player = {
   id: string;
@@ -10,7 +11,14 @@ export type Player = {
 
 export type GameStatus = "waiting" | "started" | "finished" | "cancelled" | "awaitingAnswer";
 
-export class Game {
+interface GameEvent {
+  playerJoined: Player;
+  playerLeft: Player;
+  gameStarted: undefined;
+  questionChanged: Question;
+  gameFinished: undefined;
+}
+export class Game extends Emittery<GameEvent> {
   public readonly id: UUID;
   public readonly lobbyId: string;
   public players: Player[];
@@ -18,32 +26,28 @@ export class Game {
   public updatedAt: Date;
   public status: GameStatus;
   public readonly questions: Question[];
+  private currentQuestionIndex: number;
   public readonly answers: Map<UUID, UUID>;
 
   constructor(
     id: UUID,
     lobbyId: string,
-    players: Player[],
     questions: Question[],
     answers: Map<UUID, UUID>,
     createdAt?: Date,
     updatedAt?: Date,
     status?: GameStatus
   ) {
+    super();
     this.id = id;
     this.lobbyId = lobbyId;
-    this.players = players;
+    this.players = [];
     this.questions = questions;
     this.answers = answers;
     this.createdAt = createdAt ?? new Date();
     this.updatedAt = updatedAt ?? new Date();
     this.status = status ?? "waiting";
-  }
-
-  public canStart(): boolean {
-    return (
-      this.players.length >= MIN_PLAYERS && this.questions.length > 0 && this.status === "waiting"
-    );
+    this.currentQuestionIndex = -1;
   }
 
   public start(): void {
@@ -51,8 +55,27 @@ export class Game {
       console.error(`Game cannot be started that has already started: ${this.lobbyId}`);
       throw new Error("Game cannot be started that has already started");
     }
+
+    if (this.questions.length === 0) {
+      throw new Error("No questions provided");
+    }
     this.status = "started";
     this.updatedAt = new Date();
+    this.emit("gameStarted");
+
+    this.setNextQuestion();
+  }
+
+  public setNextQuestion(): void {
+    this.currentQuestionIndex++;
+
+    const nextQuestion = this.questions[this.currentQuestionIndex];
+    if (!nextQuestion) {
+      this.status = "finished";
+      this.emit("gameFinished");
+      return;
+    }
+    this.emit("questionChanged", nextQuestion);
   }
 
   public addPlayer(userId: UUID): void {
@@ -68,7 +91,13 @@ export class Game {
     if (this.players.some((player) => player.id === userId)) {
       throw new Error("Player already in game");
     }
-    this.players.push({ id: userId, name: "Player", score: 0 });
+    const player = { id: userId, name: "Player", score: 0 };
+    this.players.push(player);
+    this.emit("playerJoined", player);
+
+    if (this.players.length >= MIN_PLAYERS) {
+      this.start();
+    }
   }
 
   public removePlayer(userId: UUID): void {
@@ -76,6 +105,8 @@ export class Game {
       throw new Error("Tried to remove player that is not in game");
     }
     console.debug(`Removing player from game: ${this.lobbyId} - ${userId}`);
+
+    this.emit("playerLeft", this.players.find((player) => player.id === userId) as Player);
     this.players = this.players.filter((player) => player.id !== userId);
   }
 }

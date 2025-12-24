@@ -1,12 +1,13 @@
 import type { UUID } from "node:crypto";
 import type { Question } from "../../types/question.js";
 
+export type OutgoingMessage = setUserIdMessage | askQuestionMessage;
 export type setUserIdMessage = {
-  event: "setUserId";
+  type: "setUserId";
   userId: UUID;
 };
 
 export type askQuestionMessage = {
-  event: "askQuestion";
+  type: "askQuestion";
   question: Question;
 };

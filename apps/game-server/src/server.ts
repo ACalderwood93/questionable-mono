@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { WebSocketServer } from "ws";
-import { createAskQuestionMessage, createSetUserIdMessage } from "./factories/messageFactory.js";
-import { GameManager } from "./gameManager.js";
+import { LobbyManager } from "./lobbyManager.js";
+import { IncomingMessageHandler } from "./messages/incoming/messageParser.js";
 
 const port = 8080;
 const wss = new WebSocketServer({ port });
@@ -10,45 +10,44 @@ console.log(`WebSocket server started on ws://localhost:${port}`);
 
 wss.on("connection", (ws, req: IncomingMessage) => {
   console.log("Client connected");
-
   try {
     // Parse URL search params
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
     const searchParams = new URLSearchParams(url.search);
-    const lobby = searchParams.get("lobby");
-
-    const userId = crypto.randomUUID();
-    console.log(`User ID: ${userId}`);
-
-    if (!lobby) {
+    const lobbyId = searchParams.get("lobby");
+    if (!lobbyId) {
       ws.send("No lobby provided");
       ws.close();
       return;
     }
 
-    const gameManager = GameManager.getInstance();
-    const game = gameManager.createGame(lobby);
+    const userId = crypto.randomUUID();
+    const lobbyManager = LobbyManager.getInstance();
+    const lobby = lobbyManager.createLobbyOrAddUserToLobby(lobbyId, userId, ws);
 
-    ws.send(createSetUserIdMessage(userId));
-
-    game.addPlayer(userId);
-
-    if (game.canStart()) {
-      game.start();
-      const firstQuestion = game.questions[0];
-      if (firstQuestion) {
-        ws.send(createAskQuestionMessage(firstQuestion));
-      }
+    if (!lobby.game) {
+      console.error("No game found for lobby: ${lobbyId}");
+      ws.close();
+      lobbyManager.deleteLobby(lobbyId);
+      return;
     }
-
+    const incomingMessageHandler = new IncomingMessageHandler(lobby?.game);
     ws.on("message", (message) => {
-      console.log(`Received: ${message.toString()}`);
+      try {
+        incomingMessageHandler.handleMessage(message.toString());
+      } catch (error) {
+        console.error("Error handling message:", error);
+      }
     });
 
     ws.on("close", () => {
       console.log("Client disconnected");
+      lobby.game?.removePlayer(userId);
+      lobby.socketConnector?.unbindSocket(userId);
 
-      game.removePlayer(userId);
+      if (lobby.game?.players.length === 0) {
+        lobbyManager.deleteLobby(lobbyId);
+      }
     });
 
     ws.on("error", (error) => {
@@ -56,11 +55,11 @@ wss.on("connection", (ws, req: IncomingMessage) => {
     });
 
     // Send a welcome message
-    ws.send(`Welcome to lobby: ${lobby}`);
+    ws.send(`Welcome to lobby: ${lobbyId}`);
   } catch (error) {
     console.error("Error:", error);
-    ws.send(`Error: ${error}`);
-    ws.close();
+    //ws.send(`Error: ${error}`);
+    //ws.close();
   }
 });
 

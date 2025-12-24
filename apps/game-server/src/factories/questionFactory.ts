@@ -5,6 +5,7 @@ function createQuestion(): [Question, UUID] {
   return [
     {
       id: crypto.randomUUID(),
+      providedAnswers: new Map(),
       text: "What is the capital of France?",
       answers: [
         {
