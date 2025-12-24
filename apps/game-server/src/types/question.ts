@@ -5,7 +5,7 @@ export type Question = {
   text: string;
   answers: Answer[];
   // map userId to answerId
-  providedAnswers: Map<UUID, Answer>;
+  providedAnswers: Map<UUID, UUID>;
 };
 
 export type Answer = {

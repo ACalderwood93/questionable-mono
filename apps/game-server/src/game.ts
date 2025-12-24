@@ -76,6 +76,29 @@ export class Game extends Emittery<GameEvent> {
       return;
     }
     this.emit("questionChanged", nextQuestion);
+    this.status = "awaitingAnswer";
+  }
+
+  public answerQuestion(userId: UUID, answerId: UUID): void {
+    if (this.status !== "awaitingAnswer") {
+      throw new Error("Game is not awaiting answers");
+    }
+
+    const currentQuestion = this.questions[this.currentQuestionIndex];
+    if (!currentQuestion) {
+      throw new Error("No question found");
+    }
+    if (currentQuestion.providedAnswers.has(userId)) {
+      console.error(`User has already answered this question: ${userId} - ${answerId}`);
+      return;
+    }
+    currentQuestion.providedAnswers.set(userId, answerId);
+    console.debug(`User answered question: ${userId} - ${answerId}`);
+
+    if (currentQuestion.providedAnswers.size === this.players.length) {
+      // check answers then move to next question
+      this.setNextQuestion();
+    }
   }
 
   public addPlayer(userId: UUID): void {

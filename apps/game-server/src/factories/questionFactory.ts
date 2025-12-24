@@ -37,6 +37,8 @@ export function createAllQuestionsAndAnswers(
   const questions = [];
   for (let i = 0; i < questionAmount; i++) {
     const [question, answerId] = createQuestion();
+
+    console.log(`Question: ${question.id} - Answer: ${answerId}`);
     answers.set(question.id, answerId);
     questions.push(question);
   }

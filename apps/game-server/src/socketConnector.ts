@@ -1,6 +1,7 @@
 import type { UUID } from "node:crypto";
 import type { WebSocket } from "ws";
 import type { Game } from "./game";
+import type { IncomingMessageHandler } from "./messages/incoming/incomingMessageHandler";
 import type { OutgoingMessage, askQuestionMessage } from "./messages/outgoing/messages";
 
 /* 
@@ -11,6 +12,7 @@ it listens to events from the game and then sends the appropriate messages to th
 export class SocketConnector {
   private readonly socketUserMap: Map<string, WebSocket>;
   private readonly game: Game;
+  private incomingMessageHandler?: IncomingMessageHandler;
   constructor(game: Game) {
     this.game = game;
     this.socketUserMap = new Map<string, WebSocket>();
@@ -18,6 +20,12 @@ export class SocketConnector {
     this.bindListeners();
   }
 
+  public bindIncomingMessageHandler(incomingMessageHandler: IncomingMessageHandler) {
+    this.incomingMessageHandler = incomingMessageHandler;
+    this.incomingMessageHandler.on("error", (error) => {
+      this.sendMessageToUser(incomingMessageHandler.userId, { type: "error", error: error });
+    });
+  }
   private bindListeners() {
     this.game.on("gameStarted", () => {
       console.log("gameStarted");

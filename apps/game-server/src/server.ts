@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { WebSocketServer } from "ws";
 import { LobbyManager } from "./lobbyManager.js";
-import { IncomingMessageHandler } from "./messages/incoming/messageParser.js";
+import { IncomingMessageHandler } from "./messages/incoming/incomingMessageHandler.js";
 
 const port = 8080;
 const wss = new WebSocketServer({ port });
@@ -31,12 +31,15 @@ wss.on("connection", (ws, req: IncomingMessage) => {
       lobbyManager.deleteLobby(lobbyId);
       return;
     }
-    const incomingMessageHandler = new IncomingMessageHandler(lobby?.game);
+    const incomingMessageHandler = new IncomingMessageHandler(lobby?.game, userId);
+    lobby.socketConnector?.bindIncomingMessageHandler(incomingMessageHandler);
     ws.on("message", (message) => {
       try {
         incomingMessageHandler.handleMessage(message.toString());
       } catch (error) {
-        console.error("Error handling message:", error);
+        console.error(
+          `Error when processing the incoming messsage for user ${userId}: ${error} for message: ${message.toString()}`
+        );
       }
     });
 
