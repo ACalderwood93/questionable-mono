@@ -1,15 +1,16 @@
 import type { IncomingMessage } from "node:http";
 import { WebSocketServer } from "ws";
 import { LobbyManager } from "./lobbyManager.js";
+import { logger } from "./logger.js";
 import { IncomingMessageHandler } from "./messages/incoming/incomingMessageHandler.js";
 
 const port = 8080;
 const wss = new WebSocketServer({ port });
 
-console.log(`WebSocket server started on ws://localhost:${port}`);
+logger.info(`WebSocket server started on ws://localhost:${port}`);
 
 wss.on("connection", (ws, req: IncomingMessage) => {
-  console.log("Client connected");
+  logger.info("Client connected");
   try {
     // Parse URL search params
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
@@ -26,7 +27,7 @@ wss.on("connection", (ws, req: IncomingMessage) => {
     const lobby = lobbyManager.createLobbyOrAddUserToLobby(lobbyId, userId, ws);
 
     if (!lobby.game) {
-      console.error("No game found for lobby: ${lobbyId}");
+      logger.error(`No game found for lobby: ${lobbyId}`);
       ws.close();
       lobbyManager.deleteLobby(lobbyId);
       return;
@@ -37,14 +38,19 @@ wss.on("connection", (ws, req: IncomingMessage) => {
       try {
         incomingMessageHandler.handleMessage(message.toString());
       } catch (error) {
-        console.error(
-          `Error when processing the incoming messsage for user ${userId}: ${error} for message: ${message.toString()}`
-        );
+        if (error instanceof Error) {
+          logger.error("Error when processing incoming message", {
+            userId,
+            errorMessage: error.message,
+            errorStack: error.stack,
+            inputMessage: message.toString(),
+          });
+        }
       }
     });
 
     ws.on("close", () => {
-      console.log("Client disconnected");
+      logger.info("Client disconnected", { userId, lobbyId });
       lobby.game?.removePlayer(userId);
       lobby.socketConnector?.unbindSocket(userId);
 
@@ -54,18 +60,18 @@ wss.on("connection", (ws, req: IncomingMessage) => {
     });
 
     ws.on("error", (error) => {
-      console.error("WebSocket error:", error);
+      logger.error("WebSocket error", { error });
     });
 
     // Send a welcome message
     ws.send(`Welcome to lobby: ${lobbyId}`);
   } catch (error) {
-    console.error("Error:", error);
+    logger.error("Connection error", { error });
     //ws.send(`Error: ${error}`);
     //ws.close();
   }
 });
 
 wss.on("error", (error) => {
-  console.error("Server error:", error);
+  logger.error("Server error", { error });
 });

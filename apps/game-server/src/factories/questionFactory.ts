@@ -1,4 +1,5 @@
 import type { UUID } from "node:crypto";
+import { logger } from "../logger.js";
 import type { Question } from "../types/question.js";
 
 function createQuestion(): [Question, UUID] {
@@ -38,7 +39,7 @@ export function createAllQuestionsAndAnswers(
   for (let i = 0; i < questionAmount; i++) {
     const [question, answerId] = createQuestion();
 
-    console.log(`Question: ${question.id} - Answer: ${answerId}`);
+    logger.debug("Question created", { questionId: question.id, answerId });
     answers.set(question.id, answerId);
     questions.push(question);
   }

@@ -1,6 +1,7 @@
 import type { UUID } from "node:crypto";
 import Emittery from "emittery";
 import type { Game } from "../../game";
+import { logger } from "../../logger.js";
 import { questionAnsweredMessageSchema } from "./messages";
 export interface IncomingMessageHandlerEvent {
   error: string;
@@ -22,11 +23,18 @@ export class IncomingMessageHandler extends Emittery<IncomingMessageHandlerEvent
         {
           const result = questionAnsweredMessageSchema.safeParse(parsedMessage);
           if (!result.success) {
-            console.error(`Invalid question answered message: ${result.error.message}`);
+            logger.error("Invalid question answered message", {
+              error: result.error.message,
+              userId: this.userId,
+            });
             this.emit("error", result.error.message);
             return;
           }
-          console.log(`Question answered: ${result.data.questionId} - ${result.data.answerId}`);
+          logger.debug("Question answered", {
+            userId: this.userId,
+            questionId: result.data.questionId,
+            answerId: result.data.answerId,
+          });
           this.game.answerQuestion(this.userId, result.data.answerId as UUID);
         }
         break;

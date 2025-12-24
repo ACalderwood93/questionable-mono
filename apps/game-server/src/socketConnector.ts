@@ -1,6 +1,7 @@
 import type { UUID } from "node:crypto";
 import type { WebSocket } from "ws";
 import type { Game } from "./game";
+import { logger } from "./logger.js";
 import type { IncomingMessageHandler } from "./messages/incoming/incomingMessageHandler";
 import type { OutgoingMessage, askQuestionMessage } from "./messages/outgoing/messages";
 
@@ -28,7 +29,7 @@ export class SocketConnector {
   }
   private bindListeners() {
     this.game.on("gameStarted", () => {
-      console.log("gameStarted");
+      logger.info("Game started", { lobbyId: this.game.lobbyId });
     });
 
     this.game.on("playerJoined", (player) => {
@@ -39,7 +40,7 @@ export class SocketConnector {
     });
 
     this.game.on("gameFinished", () => {
-      console.log("gameFinished");
+      logger.info("Game finished", { lobbyId: this.game.lobbyId });
     });
 
     this.game.on("questionChanged", (question) => {

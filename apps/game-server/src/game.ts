@@ -1,6 +1,7 @@
 import type { UUID } from "node:crypto";
 import Emittery from "emittery";
 import { MAX_PLAYERS, MIN_PLAYERS } from "./constants.js";
+import { logger } from "./logger.js";
 import type { Question } from "./types/question.js";
 
 export type Player = {
@@ -52,7 +53,7 @@ export class Game extends Emittery<GameEvent> {
 
   public start(): void {
     if (this.status !== "waiting") {
-      console.error(`Game cannot be started that has already started: ${this.lobbyId}`);
+      logger.error(`Game cannot be started that has already started: ${this.lobbyId}`);
       throw new Error("Game cannot be started that has already started");
     }
 
@@ -89,11 +90,15 @@ export class Game extends Emittery<GameEvent> {
       throw new Error("No question found");
     }
     if (currentQuestion.providedAnswers.has(userId)) {
-      console.error(`User has already answered this question: ${userId} - ${answerId}`);
+      logger.warn("User has already answered this question", {
+        userId,
+        answerId,
+        lobbyId: this.lobbyId,
+      });
       return;
     }
     currentQuestion.providedAnswers.set(userId, answerId);
-    console.debug(`User answered question: ${userId} - ${answerId}`);
+    logger.debug("User answered question", { userId, answerId, lobbyId: this.lobbyId });
 
     if (currentQuestion.providedAnswers.size === this.players.length) {
       // check answers then move to next question
@@ -102,7 +107,7 @@ export class Game extends Emittery<GameEvent> {
   }
 
   public addPlayer(userId: UUID): void {
-    console.debug(`Adding player to game: ${this.lobbyId} - ${userId}`);
+    logger.debug("Adding player to game", { lobbyId: this.lobbyId, userId });
     if (this.status !== "waiting") {
       throw new Error("User Cannot be added to game that has already started");
     }
@@ -127,7 +132,7 @@ export class Game extends Emittery<GameEvent> {
     if (!this.players.some((player) => player.id === userId)) {
       throw new Error("Tried to remove player that is not in game");
     }
-    console.debug(`Removing player from game: ${this.lobbyId} - ${userId}`);
+    logger.debug("Removing player from game", { lobbyId: this.lobbyId, userId });
 
     this.emit("playerLeft", this.players.find((player) => player.id === userId) as Player);
     this.players = this.players.filter((player) => player.id !== userId);
