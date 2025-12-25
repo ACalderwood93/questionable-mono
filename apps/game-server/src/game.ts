@@ -1,4 +1,4 @@
-import type { UUID } from "node:crypto";
+import type { UUID } from "@repo/shared";
 import Emittery from "emittery";
 import { MAX_PLAYERS, MIN_PLAYERS } from "./constants.js";
 import { logger } from "./logger.js";
@@ -17,6 +17,7 @@ interface GameEvent {
   playerLeft: Player;
   gameStarted: undefined;
   questionChanged: Question;
+  answerRevealed: { questionId: UUID; answerId: UUID; players: Player[] };
   gameFinished: undefined;
 }
 export class Game extends Emittery<GameEvent> {
@@ -29,6 +30,8 @@ export class Game extends Emittery<GameEvent> {
   public readonly questions: Question[];
   private currentQuestionIndex: number;
   public readonly answers: Map<UUID, UUID>;
+  private currentQuestionStartTime: Date | null = null;
+  private playerAnswerTimes: Map<UUID, Date> = new Map();
 
   constructor(
     id: UUID,
@@ -69,6 +72,7 @@ export class Game extends Emittery<GameEvent> {
 
   public setNextQuestion(): void {
     this.currentQuestionIndex++;
+    this.playerAnswerTimes.clear();
 
     const nextQuestion = this.questions[this.currentQuestionIndex];
     if (!nextQuestion) {
@@ -76,6 +80,7 @@ export class Game extends Emittery<GameEvent> {
       this.emit("gameFinished");
       return;
     }
+    this.currentQuestionStartTime = new Date();
     this.emit("questionChanged", nextQuestion);
     this.status = "awaitingAnswer";
   }
@@ -89,7 +94,7 @@ export class Game extends Emittery<GameEvent> {
     if (!currentQuestion) {
       throw new Error("No question found");
     }
-    if (currentQuestion.providedAnswers.has(userId)) {
+    if (currentQuestion.providedAnswers[userId]) {
       logger.warn("User has already answered this question", {
         userId,
         answerId,
@@ -97,12 +102,60 @@ export class Game extends Emittery<GameEvent> {
       });
       return;
     }
-    currentQuestion.providedAnswers.set(userId, answerId);
+    currentQuestion.providedAnswers[userId] = answerId;
+    this.playerAnswerTimes.set(userId, new Date());
     logger.debug("User answered question", { userId, answerId, lobbyId: this.lobbyId });
 
-    if (currentQuestion.providedAnswers.size === this.players.length) {
+    if (Object.keys(currentQuestion.providedAnswers).length === this.players.length) {
+      const correctAnswer = this.answers.get(currentQuestion.id);
+
+      if (!this.currentQuestionStartTime) {
+        throw new Error("Question start time not set");
+      }
+
+      // Update scores based on time taken
+      for (const player of this.players) {
+        if (currentQuestion.providedAnswers[player.id as UUID] === correctAnswer) {
+          const answerTime = this.playerAnswerTimes.get(player.id as UUID);
+          if (!answerTime) {
+            logger.warn("Answer time not found for player", { playerId: player.id });
+            continue;
+          }
+
+          const timeTakenSeconds =
+            (answerTime.getTime() - this.currentQuestionStartTime.getTime()) / 1000;
+
+          // Calculate points: max 20, min 5
+          // Linear from 20 (at 0s) to 5 (at 15s)
+          // Anything over 15s gets 5 points
+          let points = 20;
+          if (timeTakenSeconds > 15) {
+            points = 5;
+          } else {
+            points = Math.max(5, 20 - timeTakenSeconds);
+          }
+
+          player.score += Math.round(points);
+          logger.debug("Player scored points", {
+            playerId: player.id,
+            timeTakenSeconds,
+            points: Math.round(points),
+            newScore: player.score,
+          });
+        }
+      }
+
       // check answers then move to next question
-      this.setNextQuestion();
+      this.emit("answerRevealed", {
+        questionId: currentQuestion.id,
+        answerId: correctAnswer as UUID,
+        players: this.players,
+      });
+
+      // Move to next question after 3 seconds
+      setTimeout(() => {
+        this.setNextQuestion();
+      }, 3000);
     }
   }
 

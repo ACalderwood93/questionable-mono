@@ -1,16 +1,17 @@
-import type { UUID } from "node:crypto";
+import type { UUID } from "@repo/shared";
 import { logger } from "../logger.js";
 import type { Question } from "../types/question.js";
 
 function createQuestion(): [Question, UUID] {
+  const parisId = crypto.randomUUID();
   return [
     {
       id: crypto.randomUUID(),
-      providedAnswers: new Map(),
+      providedAnswers: {},
       text: "What is the capital of France?",
       answers: [
         {
-          id: crypto.randomUUID(),
+          id: parisId,
           text: "Paris",
         },
         {
@@ -27,7 +28,7 @@ function createQuestion(): [Question, UUID] {
         },
       ],
     } satisfies Question,
-    crypto.randomUUID(),
+    parisId,
   ];
 }
 

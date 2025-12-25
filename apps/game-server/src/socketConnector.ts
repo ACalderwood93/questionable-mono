@@ -1,9 +1,8 @@
-import type { UUID } from "node:crypto";
+import type { OutgoingMessage, UUID } from "@repo/shared";
 import type { WebSocket } from "ws";
-import type { Game } from "./game";
+import type { Game } from "./game.js";
 import { logger } from "./logger.js";
-import type { IncomingMessageHandler } from "./messages/incoming/incomingMessageHandler";
-import type { OutgoingMessage, askQuestionMessage } from "./messages/outgoing/messages";
+import type { IncomingMessageHandler } from "./messages/incoming/incomingMessageHandler.js";
 
 /* 
 this class is responsbile for bridging the gap between the game logic and the underlying websocket connection, 
@@ -32,10 +31,31 @@ export class SocketConnector {
       logger.info("Game started", { lobbyId: this.game.lobbyId });
     });
 
+    this.game.on("answerRevealed", (answerRevealed) => {
+      this.sendMessageToAllUsers({
+        type: "answerRevealed",
+        questionId: answerRevealed.questionId,
+        answerId: answerRevealed.answerId,
+        players: answerRevealed.players,
+      });
+    });
+
     this.game.on("playerJoined", (player) => {
       this.sendMessageToUser(player.id, {
         type: "setUserId",
         userId: player.id as UUID,
+      });
+
+      this.sendMessageToAllUsers({
+        type: "playerUpdate",
+        players: this.game.players,
+      });
+    });
+
+    this.game.on("playerLeft", (_player) => {
+      this.sendMessageToAllUsers({
+        type: "playerUpdate",
+        players: this.game.players,
       });
     });
 
@@ -47,7 +67,7 @@ export class SocketConnector {
       this.sendMessageToAllUsers({
         type: "askQuestion",
         question: question,
-      } satisfies askQuestionMessage);
+      });
     });
   }
   public bindSocket(userId: string, socket: WebSocket): void {

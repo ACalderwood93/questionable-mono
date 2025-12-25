@@ -55,6 +55,7 @@ wss.on("connection", (ws, req: IncomingMessage) => {
       lobby.socketConnector?.unbindSocket(userId);
 
       if (lobby.game?.players.length === 0) {
+        logger.info("Deleting lobby", { lobbyId });
         lobbyManager.deleteLobby(lobbyId);
       }
     });
@@ -66,9 +67,16 @@ wss.on("connection", (ws, req: IncomingMessage) => {
     // Send a welcome message
     ws.send(`Welcome to lobby: ${lobbyId}`);
   } catch (error) {
-    logger.error("Connection error", { error });
-    //ws.send(`Error: ${error}`);
-    //ws.close();
+    if (error instanceof Error) {
+      logger.error("Connection error", {
+        errorMessage: error.message,
+        errorStack: error.stack,
+        errorName: error.name,
+        errorCause: error.cause,
+      });
+      ws.send(JSON.stringify({ type: "error", error: error.message }));
+    }
+    ws.close();
   }
 });
 

@@ -1,8 +1,7 @@
-import type { UUID } from "node:crypto";
+import { type UUID, questionAnsweredMessageSchema } from "@repo/shared";
 import Emittery from "emittery";
-import type { Game } from "../../game";
+import type { Game } from "../../game.js";
 import { logger } from "../../logger.js";
-import { questionAnsweredMessageSchema } from "./messages";
 export interface IncomingMessageHandlerEvent {
   error: string;
 }

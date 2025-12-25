@@ -1,4 +1,4 @@
-import type { UUID } from "node:crypto";
+import type { UUID } from "@repo/shared";
 import type { WebSocket } from "ws";
 import { createAllQuestionsAndAnswers } from "./factories/questionFactory.js";
 import { Game } from "./game.js";
@@ -42,7 +42,7 @@ export class LobbyManager implements ILobbyManager {
       return existingLobby;
     }
 
-    const [questions, answers] = createAllQuestionsAndAnswers(10);
+    const [questions, answers] = createAllQuestionsAndAnswers(2);
     const game = new Game(crypto.randomUUID(), lobbyId, questions, answers);
     const socketConnector = new SocketConnector(game);
 
