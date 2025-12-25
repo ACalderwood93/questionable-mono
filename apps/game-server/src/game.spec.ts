@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { MAX_PLAYERS } from "../constants.js";
 import { createAllQuestionsAndAnswers } from "../factories/questionFactory.js";
-import { Game } from "./game.js";
+import { Game } from "../game.js";
 
 describe("Game", () => {
   let game: Game;

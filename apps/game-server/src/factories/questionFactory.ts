@@ -1,14 +1,17 @@
-import type { UUID } from "node:crypto";
+import type { UUID } from "@repo/shared";
+import { logger } from "../logger.js";
 import type { Question } from "../types/question.js";
 
 function createQuestion(): [Question, UUID] {
+  const parisId = crypto.randomUUID();
   return [
     {
       id: crypto.randomUUID(),
+      providedAnswers: {},
       text: "What is the capital of France?",
       answers: [
         {
-          id: crypto.randomUUID(),
+          id: parisId,
           text: "Paris",
         },
         {
@@ -25,7 +28,7 @@ function createQuestion(): [Question, UUID] {
         },
       ],
     } satisfies Question,
-    crypto.randomUUID(),
+    parisId,
   ];
 }
 
@@ -36,6 +39,8 @@ export function createAllQuestionsAndAnswers(
   const questions = [];
   for (let i = 0; i < questionAmount; i++) {
     const [question, answerId] = createQuestion();
+
+    logger.debug("Question created", { questionId: question.id, answerId });
     answers.set(question.id, answerId);
     questions.push(question);
   }

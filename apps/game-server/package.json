@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
-    "ws": "^8.18.3"
+    "emittery": "^1.2.0",
+    "winston": "^3.19.0",
+    "ws": "^8.18.3",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
