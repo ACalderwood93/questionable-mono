@@ -1,0 +1,29 @@
+# Exclude build outputs and dependencies
+node_modules
+dist
+build
+.next
+.turbo
+*.tsbuildinfo
+
+# Exclude IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Exclude test files
+coverage
+*.log
+
+# Exclude local env files
+.env
+.env*.local
+
+# But DO NOT exclude these workspace files:
+# !package.json
+# !pnpm-lock.yaml
+# !pnpm-workspace.yaml
+# !turbo.json
+# !tsconfig.json
+
