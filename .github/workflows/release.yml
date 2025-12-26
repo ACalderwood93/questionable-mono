@@ -48,7 +48,6 @@ jobs:
     name: Deploy to Dockploy
     runs-on: ubuntu-latest
     needs: release
-    if: needs.release.result == 'success' && needs.release.outputs.released == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -62,17 +61,17 @@ jobs:
           SERVICE_ID: R5wAIb09b-K5jt9Hk0FUz
         run: |
           echo "Triggering deployment to Dockploy..."
-          
+
           # Try the compose service deployment endpoint
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
             "${DOCKPLOY_BASE_URL}/api/projects/${PROJECT_ID}/environments/${ENVIRONMENT_ID}/services/compose/${SERVICE_ID}/deploy" \
             -H "Authorization: Bearer ${DOCKPLOY_API_KEY}" \
             -H "Content-Type: application/json" \
             -d '{}' || echo -e "\n000")
-          
+
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | sed '$d')
-          
+
           if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
             echo "✅ Deployment triggered successfully!"
             echo "Response: $BODY"
