@@ -117,4 +117,3 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
     </section>
   );
 }
-

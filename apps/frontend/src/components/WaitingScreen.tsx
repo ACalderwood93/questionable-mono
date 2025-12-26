@@ -6,14 +6,8 @@ interface WaitingScreenProps {
   onToggleReady: (playerId: string) => void;
 }
 
-export function WaitingScreen({
-  players,
-  currentUserId,
-  onToggleReady,
-}: WaitingScreenProps) {
-  const currentPlayer = currentUserId
-    ? players.find((p) => p.id === currentUserId)
-    : null;
+export function WaitingScreen({ players, currentUserId, onToggleReady }: WaitingScreenProps) {
+  const currentPlayer = currentUserId ? players.find((p) => p.id === currentUserId) : null;
   const readyCount = players.filter((p) => p.isReady).length;
   const totalPlayers = players.length;
   const allReady = players.length > 0 && players.every((p) => p.isReady);

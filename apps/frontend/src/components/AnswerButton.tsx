@@ -16,7 +16,7 @@ export function AnswerButton({
   onClick,
 }: AnswerButtonProps) {
   let buttonClasses = "h-full min-h-20 text-xs border-2 px-4 py-2 transition-all";
-  
+
   if (isRevealed) {
     if (isCorrect) {
       buttonClasses += " bg-green-600 border-green-500 text-white";
@@ -32,12 +32,7 @@ export function AnswerButton({
   }
 
   return (
-    <button
-      type="button"
-      className={buttonClasses}
-      onClick={onClick}
-      disabled={isRevealed}
-    >
+    <button type="button" className={buttonClasses} onClick={onClick} disabled={isRevealed}>
       {answer.text}
       {isSelected && (
         <>
