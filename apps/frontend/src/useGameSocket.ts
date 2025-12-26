@@ -1,4 +1,9 @@
-import type { OutgoingMessage, PlayerActionMessage, QuestionAnsweredMessage } from "@repo/shared";
+import type {
+  OutgoingMessage,
+  PlayerActionMessage,
+  QuestionAnsweredMessage,
+  TogglePlayerReadyMessage,
+} from "@repo/shared";
 import { useAtom } from "jotai";
 import { useCallback, useEffect } from "react";
 import {
@@ -135,5 +140,15 @@ export const useGameSocket = (lobbyId: string | null, playerName: string) => {
     }
   };
 
-  return { sendAnswer, sendAction };
+  const sendToggleReady = (playerId: string) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const message: TogglePlayerReadyMessage = {
+        type: "togglePlayerReady",
+        playerId,
+      };
+      socket.send(JSON.stringify(message));
+    }
+  };
+
+  return { sendAnswer, sendAction, sendToggleReady };
 };

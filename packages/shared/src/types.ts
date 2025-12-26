@@ -20,6 +20,7 @@ export type Player = {
   powerPoints: number; // Currency for actions
   shields: number; // Number of active shields
   skipNextQuestion: boolean; // Whether player must skip next question
+  isReady: boolean; // Whether player is ready to start the game
 };
 
 export type PlayerAction = "attack" | "shield" | "skip";

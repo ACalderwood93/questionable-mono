@@ -1,4 +1,9 @@
-import { type UUID, playerActionMessageSchema, questionAnsweredMessageSchema } from "@repo/shared";
+import {
+  type UUID,
+  playerActionMessageSchema,
+  questionAnsweredMessageSchema,
+  togglePlayerReadyMessageSchema,
+} from "@repo/shared";
 import Emittery from "emittery";
 import type { Game } from "../../game.js";
 import { logger } from "../../logger.js";
@@ -37,6 +42,19 @@ export class IncomingMessageHandler extends Emittery<IncomingMessageHandlerEvent
           this.game.answerQuestion(this.userId, result.data.answerId as UUID);
         }
         break;
+      case "togglePlayerReady": {
+        const result = togglePlayerReadyMessageSchema.safeParse(parsedMessage);
+        if (!result.success) {
+          logger.error("Invalid toggle player ready message", {
+            error: result.error.message,
+            userId: this.userId,
+          });
+          return;
+        }
+
+        this.game.togglePlayerReady(result.data.playerId as UUID);
+        break;
+      }
       case "playerAction":
         {
           const result = playerActionMessageSchema.safeParse(parsedMessage);
