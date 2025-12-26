@@ -21,6 +21,5 @@ services:
     expose:
       - 80
     depends_on:
-      game-server:
-        condition: service_healthy
+      - game-server
     restart: unless-stopped
