@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.semantic.outputs.new_release_published }}
+      version: ${{ steps.semantic.outputs.new_release_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run semantic-release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec semantic-release
+
+  deploy:
+    name: Deploy to Dockploy
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trigger Dockploy deployment
+        env:
+          DOCKPLOY_API_KEY: ${{ secrets.DOCKPLOY_API_KEY }}
+          DOCKPLOY_BASE_URL: https://dockploy.pandapops.me
+          PROJECT_ID: JKEAguf1j-opC0aVl8n3h
+          ENVIRONMENT_ID: x6fv-NJ26p9Gj6trenqqe
+          SERVICE_ID: R5wAIb09b-K5jt9Hk0FUz
+        run: |
+          echo "Triggering deployment to Dockploy..."
+          
+          # Try the compose service deployment endpoint
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "${DOCKPLOY_BASE_URL}/api/projects/${PROJECT_ID}/environments/${ENVIRONMENT_ID}/services/compose/${SERVICE_ID}/deploy" \
+            -H "Authorization: Bearer ${DOCKPLOY_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{}' || echo -e "\n000")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ Deployment triggered successfully!"
+            echo "Response: $BODY"
+          else
+            echo "❌ Deployment failed with HTTP code: $HTTP_CODE"
+            echo "Response: $BODY"
+            exit 1
+          fi
