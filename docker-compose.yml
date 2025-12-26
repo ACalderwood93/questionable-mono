@@ -18,8 +18,5 @@ services:
       args:
         - VITE_WS_URL=ws://game-server:8080
 
-    expose:
-      - 80
-    depends_on:
-      - game-server
-    restart: unless-stopped
+    ports:
+      - "80:80"
