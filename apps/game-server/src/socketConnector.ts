@@ -69,6 +69,18 @@ export class SocketConnector {
         question: question,
       });
     });
+
+    this.game.on("actionPerformed", (actionResult) => {
+      this.sendMessageToAllUsers({
+        type: "actionResult",
+        action: actionResult.action,
+        actorId: actionResult.actorId,
+        targetId: actionResult.targetId,
+        success: actionResult.success,
+        message: actionResult.message,
+        players: actionResult.players,
+      });
+    });
   }
   public bindSocket(userId: string, socket: WebSocket): void {
     this.socketUserMap.set(userId, socket);

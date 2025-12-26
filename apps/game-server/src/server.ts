@@ -17,14 +17,15 @@ wss.on("connection", (ws, req: IncomingMessage) => {
     const searchParams = new URLSearchParams(url.search);
     const lobbyId = searchParams.get("lobby");
     if (!lobbyId) {
-      ws.send("No lobby provided");
+      ws.send(JSON.stringify({ type: "error", error: "No lobby provided" }));
       ws.close();
       return;
     }
 
+    const playerName = searchParams.get("name") || "Player";
     const userId = crypto.randomUUID();
     const lobbyManager = LobbyManager.getInstance();
-    const lobby = lobbyManager.createLobbyOrAddUserToLobby(lobbyId, userId, ws);
+    const lobby = lobbyManager.createLobbyOrAddUserToLobby(lobbyId, userId, playerName, ws);
 
     if (!lobby.game) {
       logger.error(`No game found for lobby: ${lobbyId}`);

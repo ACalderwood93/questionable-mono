@@ -2,17 +2,18 @@ import { useState } from "react";
 import { ErrorMessage } from "./ErrorMessage";
 
 interface TitleScreenProps {
-  onJoin: (lobbyId: string) => void;
+  onJoin: (lobbyId: string, playerName: string) => void;
   error: string | null;
 }
 
 export function TitleScreen({ onJoin, error }: TitleScreenProps) {
   const [lobbyInput, setLobbyInput] = useState("");
+  const [playerName, setPlayerName] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (lobbyInput) {
-      onJoin(lobbyInput);
+    if (lobbyInput && playerName.trim()) {
+      onJoin(lobbyInput, playerName.trim());
     }
   };
 
@@ -29,6 +30,21 @@ export function TitleScreen({ onJoin, error }: TitleScreenProps) {
           {error && <ErrorMessage message={error} size="small" />}
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
+              <label htmlFor="player_name" className="block mb-2 text-sm">
+                Your Name
+              </label>
+              <input
+                type="text"
+                id="player_name"
+                className="w-full bg-gray-700 border-2 border-gray-600 text-white px-4 py-2 focus:outline-none focus:border-blue-500 mb-4"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                placeholder="e.g. QuizMaster"
+                maxLength={20}
+                required
+              />
+            </div>
+            <div className="mb-4">
               <label htmlFor="lobby_id" className="block mb-2 text-sm">
                 Lobby Name
               </label>
@@ -39,11 +55,13 @@ export function TitleScreen({ onJoin, error }: TitleScreenProps) {
                 value={lobbyInput}
                 onChange={(e) => setLobbyInput(e.target.value)}
                 placeholder="e.g. MEGA-ROOM"
+                required
               />
             </div>
             <button
               type="submit"
               className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500 px-4 py-2 transition-all hover:scale-105"
+              disabled={!lobbyInput || !playerName.trim()}
             >
               START QUEST
             </button>

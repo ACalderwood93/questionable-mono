@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   game-server:
@@ -11,3 +11,16 @@ services:
       - NODE_ENV=production
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        - VITE_WS_URL=ws://localhost:8080
+
+    expose:
+      - 80
+    depends_on:
+      game-server:
+        condition: service_healthy
+    restart: unless-stopped

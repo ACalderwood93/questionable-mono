@@ -6,7 +6,12 @@ import { SocketConnector } from "./socketConnector.js";
 import type { Lobby } from "./types/Lobby.js";
 
 export interface ILobbyManager {
-  createLobbyOrAddUserToLobby(lobbyId: string, userId: UUID, socket: WebSocket): Lobby;
+  createLobbyOrAddUserToLobby(
+    lobbyId: string,
+    userId: UUID,
+    playerName: string,
+    socket: WebSocket
+  ): Lobby;
   getLobby(lobbyId: string): Lobby | undefined;
   deleteLobby(lobbyId: string): void;
 }
@@ -33,21 +38,26 @@ export class LobbyManager implements ILobbyManager {
     return LobbyManager.instance;
   }
 
-  public createLobbyOrAddUserToLobby(lobbyId: string, userId: UUID, socket: WebSocket): Lobby {
+  public createLobbyOrAddUserToLobby(
+    lobbyId: string,
+    userId: UUID,
+    playerName: string,
+    socket: WebSocket
+  ): Lobby {
     const existingLobby = this.getLobby(lobbyId);
 
     if (existingLobby) {
       existingLobby.socketConnector?.bindSocket(userId, socket);
-      existingLobby.game?.addPlayer(userId);
+      existingLobby.game?.addPlayer(userId, playerName);
       return existingLobby;
     }
 
-    const [questions, answers] = createAllQuestionsAndAnswers(2);
+    const [questions, answers] = createAllQuestionsAndAnswers(20);
     const game = new Game(crypto.randomUUID(), lobbyId, questions, answers);
     const socketConnector = new SocketConnector(game);
 
     socketConnector.bindSocket(userId, socket);
-    game.addPlayer(userId);
+    game.addPlayer(userId, playerName);
 
     const newLobby: Lobby = {
       id: lobbyId,

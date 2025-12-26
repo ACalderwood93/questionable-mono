@@ -1,6 +1,33 @@
-# React + TypeScript + Vite
+# Questionable Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite frontend for the Questionable quiz battle game.
+
+## Environment Variables
+
+The frontend uses environment variables for configuration. Create a `.env` file in this directory:
+
+```bash
+# WebSocket server URL
+# For local development: ws://localhost:8080
+# For production: wss://your-server.com (or ws://your-server.com:8080)
+VITE_WS_URL=ws://localhost:8080
+```
+
+**Note:** In Vite, only environment variables prefixed with `VITE_` are exposed to the client code.
+
+## Development
+
+```bash
+pnpm dev
+```
+
+## Building
+
+```bash
+pnpm build
+```
+
+The build output will be in the `dist` directory.
 
 Currently, two official plugins are available:
 

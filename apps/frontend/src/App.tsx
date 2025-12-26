@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import {
+  ActionPanel,
   ErrorMessage,
   GameHeader,
   PlayerScoreboard,
@@ -13,6 +14,7 @@ import {
   currentQuestionAtom,
   errorAtom,
   lobbyIdAtom,
+  playerNameAtom,
   playersAtom,
   userAnswerIdAtom,
   userIdAtom,
@@ -21,6 +23,7 @@ import { useGameSocket } from "./useGameSocket";
 
 function App() {
   const [lobbyId, setLobbyId] = useAtom(lobbyIdAtom);
+  const [playerName, setPlayerName] = useAtom(playerNameAtom);
   const [userId] = useAtom(userIdAtom);
   const [currentQuestion] = useAtom(currentQuestionAtom);
   const [players] = useAtom(playersAtom);
@@ -28,7 +31,7 @@ function App() {
   const [userAnswerId] = useAtom(userAnswerIdAtom);
   const [correctAnswerId] = useAtom(correctAnswerIdAtom);
 
-  const { sendAnswer } = useGameSocket(lobbyId);
+  const { sendAnswer, sendAction } = useGameSocket(lobbyId, playerName);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -48,8 +51,9 @@ function App() {
     window.history.pushState({}, "", url);
   }, [lobbyId]);
 
-  const handleJoinLobby = (lobbyId: string) => {
+  const handleJoinLobby = (lobbyId: string, name: string) => {
     setError(null);
+    setPlayerName(name);
     setLobbyId(lobbyId);
   };
 
@@ -62,10 +66,10 @@ function App() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-8 bg-gray-900 text-white min-h-screen py-8">
+    <div className="max-w-6xl mx-auto px-4 md:px-8 bg-gray-900 text-white min-h-screen py-8">
       <GameHeader lobbyId={lobbyId} userId={userId} onLeave={handleLeaveLobby} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 lg:gap-8 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_500px] gap-5 lg:gap-8 w-full">
         <div>
           {error && <ErrorMessage message={error} />}
 
@@ -81,8 +85,9 @@ function App() {
           )}
         </div>
 
-        <aside>
+        <aside className="space-y-6">
           <PlayerScoreboard players={players} currentUserId={userId} />
+          <ActionPanel players={players} currentUserId={userId} onAction={sendAction} />
         </aside>
       </div>
     </div>

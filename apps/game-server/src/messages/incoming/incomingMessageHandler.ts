@@ -1,4 +1,4 @@
-import { type UUID, questionAnsweredMessageSchema } from "@repo/shared";
+import { type UUID, playerActionMessageSchema, questionAnsweredMessageSchema } from "@repo/shared";
 import Emittery from "emittery";
 import type { Game } from "../../game.js";
 import { logger } from "../../logger.js";
@@ -35,6 +35,29 @@ export class IncomingMessageHandler extends Emittery<IncomingMessageHandlerEvent
             answerId: result.data.answerId,
           });
           this.game.answerQuestion(this.userId, result.data.answerId as UUID);
+        }
+        break;
+      case "playerAction":
+        {
+          const result = playerActionMessageSchema.safeParse(parsedMessage);
+          if (!result.success) {
+            logger.error("Invalid player action message", {
+              error: result.error.message,
+              userId: this.userId,
+            });
+            this.emit("error", result.error.message);
+            return;
+          }
+          logger.debug("Player action", {
+            userId: this.userId,
+            action: result.data.action,
+            targetId: result.data.targetPlayerId,
+          });
+          this.game.performAction(
+            this.userId,
+            result.data.action,
+            result.data.targetPlayerId as UUID | undefined
+          );
         }
         break;
       default:

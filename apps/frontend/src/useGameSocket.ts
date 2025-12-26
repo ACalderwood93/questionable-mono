@@ -1,4 +1,4 @@
-import type { OutgoingMessage, QuestionAnsweredMessage } from "@repo/shared";
+import type { OutgoingMessage, PlayerActionMessage, QuestionAnsweredMessage } from "@repo/shared";
 import { useAtom } from "jotai";
 import { useCallback, useEffect } from "react";
 import {
@@ -13,7 +13,7 @@ import {
   userIdAtom,
 } from "./store";
 
-export const useGameSocket = (lobbyId: string | null) => {
+export const useGameSocket = (lobbyId: string | null, playerName: string) => {
   const [, setUserId] = useAtom(userIdAtom);
   const [, setCurrentQuestion] = useAtom(currentQuestionAtom);
   const [, setPlayers] = useAtom(playersAtom);
@@ -25,9 +25,12 @@ export const useGameSocket = (lobbyId: string | null) => {
   const [, setLobbyId] = useAtom(lobbyIdAtom);
 
   const connect = useCallback(() => {
-    if (!lobbyId) return;
+    if (!lobbyId || !playerName) return;
 
-    const ws = new WebSocket(`ws://localhost:8080?lobby=${lobbyId}`);
+    // Get WebSocket URL from environment variable, fallback to localhost for development
+    const wsUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8080";
+    const encodedName = encodeURIComponent(playerName);
+    const ws = new WebSocket(`${wsUrl}?lobby=${lobbyId}&name=${encodedName}`);
 
     ws.onopen = () => {
       console.log("Connected to server");
@@ -58,6 +61,15 @@ export const useGameSocket = (lobbyId: string | null) => {
             setPlayers(message.players);
             setGameStatus("revealed");
             break;
+          case "actionResult":
+            setPlayers(message.players);
+            // Show action result message
+            if (message.success) {
+              console.log(`Action ${message.action}: ${message.message}`);
+            } else {
+              setError(message.message);
+            }
+            break;
           case "error":
             setError(message.error);
             setLobbyId(null);
@@ -83,6 +95,7 @@ export const useGameSocket = (lobbyId: string | null) => {
     };
   }, [
     lobbyId,
+    playerName,
     setUserId,
     setCurrentQuestion,
     setGameStatus,
@@ -111,5 +124,16 @@ export const useGameSocket = (lobbyId: string | null) => {
     }
   };
 
-  return { sendAnswer };
+  const sendAction = (action: "attack" | "shield" | "skip", targetPlayerId?: string) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const message: PlayerActionMessage = {
+        type: "playerAction",
+        action,
+        targetPlayerId: targetPlayerId as string | undefined,
+      };
+      socket.send(JSON.stringify(message));
+    }
+  };
+
+  return { sendAnswer, sendAction };
 };
