@@ -18,7 +18,7 @@ services:
       context: .
       dockerfile: apps/frontend/Dockerfile
       args:
-        - VITE_WS_URL=ws://game-server:8080
+        - VITE_WS_URL=${GAME_SERVER_URL:-ws://localhost:8080}
 
 networks:
   dokploy-network:
