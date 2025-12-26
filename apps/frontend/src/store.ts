@@ -1,5 +1,5 @@
+import type { Player, Question, UUID } from "@repo/shared";
 import { atom } from "jotai";
-import type { Question, UUID, Player } from "@repo/shared";
 
 export const userIdAtom = atom<UUID | null>(null);
 export const currentQuestionAtom = atom<Question | null>(null);

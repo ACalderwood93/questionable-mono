@@ -24,7 +24,7 @@ export function WaitingScreen({ players, currentUserId, onToggleReady }: Waiting
         <div
           className="bg-blue-600 h-full transition-all duration-300"
           style={{ width: `${totalPlayers > 0 ? (readyCount / totalPlayers) * 100 : 0}%` }}
-        ></div>
+        />
       </div>
 
       <div className="space-y-2 mb-6">
@@ -53,6 +53,7 @@ export function WaitingScreen({ players, currentUserId, onToggleReady }: Waiting
       {currentPlayer && (
         <div className="text-center">
           <button
+            type="button"
             onClick={() => onToggleReady(currentPlayer.id)}
             className={`px-8 py-4 border-4 font-bold text-lg transition-all ${
               currentPlayer.isReady

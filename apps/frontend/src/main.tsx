@@ -7,7 +7,7 @@ import App from "./App.tsx";
 document.body.style.backgroundColor = "#111827";
 document.body.style.color = "white";
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
     <App />
   </StrictMode>
