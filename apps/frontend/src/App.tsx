@@ -31,7 +31,7 @@ function App() {
   const [userAnswerId] = useAtom(userAnswerIdAtom);
   const [correctAnswerId] = useAtom(correctAnswerIdAtom);
 
-  const { sendAnswer, sendAction } = useGameSocket(lobbyId, playerName);
+  const { sendAnswer, sendAction, sendToggleReady } = useGameSocket(lobbyId, playerName);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -69,11 +69,17 @@ function App() {
     <div className="max-w-6xl mx-auto px-4 md:px-8 bg-gray-900 text-white min-h-screen py-8">
       <GameHeader lobbyId={lobbyId} userId={userId} onLeave={handleLeaveLobby} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_500px] gap-5 lg:gap-8 w-full">
-        <div>
+      <div className="flex flex-row flex-wrap gap-5 lg:gap-8 w-full">
+        <div className="flex-grow">
           {error && <ErrorMessage message={error} />}
 
-          {!currentQuestion && <WaitingScreen />}
+          {!currentQuestion && (
+            <WaitingScreen
+              players={players}
+              currentUserId={userId}
+              onToggleReady={sendToggleReady}
+            />
+          )}
 
           {currentQuestion && (
             <QuestionCard
@@ -85,10 +91,12 @@ function App() {
           )}
         </div>
 
-        <aside className="space-y-6">
-          <PlayerScoreboard players={players} currentUserId={userId} />
-          <ActionPanel players={players} currentUserId={userId} onAction={sendAction} />
-        </aside>
+        {currentQuestion && (
+          <aside className="space-y-6 w-full lg:w-1/3">
+            <PlayerScoreboard players={players} currentUserId={userId} />
+            <ActionPanel players={players} currentUserId={userId} onAction={sendAction} />
+          </aside>
+        )}
       </div>
     </div>
   );

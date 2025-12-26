@@ -65,6 +65,7 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
           </div>
           <p className="text-[0.5rem] mb-2 text-gray-400">Deals 30 damage + drains 5 PP</p>
           <button
+            type="button"
             className="w-full bg-red-600 hover:bg-red-700 text-white border-2 border-red-500 px-2 py-1 text-xs transition-all disabled:opacity-50"
             onClick={() => handleActionClick("attack")}
             disabled={currentPlayer.powerPoints < ACTION_COSTS.attack || otherPlayers.length === 0}
@@ -81,6 +82,7 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
           </div>
           <p className="text-[0.5rem] mb-2 text-gray-400">Gain 2 shields (10 dmg each)</p>
           <button
+            type="button"
             className="w-full bg-yellow-600 hover:bg-yellow-700 text-white border-2 border-yellow-500 px-2 py-1 text-xs transition-all disabled:opacity-50"
             onClick={() => handleActionClick("shield")}
             disabled={currentPlayer.powerPoints < ACTION_COSTS.shield}
@@ -97,6 +99,7 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
           </div>
           <p className="text-[0.5rem] mb-2 text-gray-400">Skip next Q + drain 15 PP</p>
           <button
+            type="button"
             className="w-full bg-purple-600 hover:bg-purple-700 text-white border-2 border-purple-500 px-2 py-1 text-xs transition-all disabled:opacity-50"
             onClick={() => handleActionClick("skip")}
             disabled={currentPlayer.powerPoints < ACTION_COSTS.skip || otherPlayers.length === 0}
@@ -117,4 +120,3 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
     </section>
   );
 }
-

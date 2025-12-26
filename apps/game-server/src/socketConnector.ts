@@ -40,6 +40,13 @@ export class SocketConnector {
       });
     });
 
+    this.game.on("playersUpdated", (players) => {
+      this.sendMessageToAllUsers({
+        type: "playerUpdate",
+        players: players,
+      });
+    });
+
     this.game.on("playerJoined", (player) => {
       this.sendMessageToUser(player.id, {
         type: "setUserId",

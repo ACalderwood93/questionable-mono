@@ -2,6 +2,7 @@ export * from "./types.js";
 export {
   questionAnsweredMessageSchema,
   playerActionMessageSchema,
+  togglePlayerReadyMessageSchema,
   type QuestionAnsweredMessage,
   type PlayerActionMessage,
   type IncomingMessage,
@@ -12,6 +13,7 @@ export {
   type ErrorMessage,
   type AnswerRevealedMessage,
   type ActionResultMessage,
+  type TogglePlayerReadyMessage,
 } from "./messages.js";
 export type { Player } from "./types.js";
 

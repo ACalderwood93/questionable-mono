@@ -6,6 +6,12 @@ export const questionAnsweredMessageSchema = z.object({
   answerId: z.string().uuid(),
   type: z.literal("questionAnswered"),
 });
+
+export const togglePlayerReadyMessageSchema = z.object({
+  type: z.literal("togglePlayerReady"),
+  playerId: z.string().uuid(),
+});
+export type TogglePlayerReadyMessage = z.infer<typeof togglePlayerReadyMessageSchema>;
 export type QuestionAnsweredMessage = z.infer<typeof questionAnsweredMessageSchema>;
 
 export const playerActionMessageSchema = z.object({
@@ -15,7 +21,10 @@ export const playerActionMessageSchema = z.object({
 });
 export type PlayerActionMessage = z.infer<typeof playerActionMessageSchema>;
 
-export type IncomingMessage = QuestionAnsweredMessage | PlayerActionMessage;
+export type IncomingMessage =
+  | QuestionAnsweredMessage
+  | PlayerActionMessage
+  | TogglePlayerReadyMessage;
 
 export type OutgoingMessage =
   | SetUserIdMessage

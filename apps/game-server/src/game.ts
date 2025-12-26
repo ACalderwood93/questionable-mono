@@ -11,6 +11,7 @@ interface GameEvent {
   playerLeft: Player;
   gameStarted: undefined;
   questionChanged: Question;
+  playersUpdated: Player[];
   answerRevealed: { questionId: UUID; answerId: UUID; players: Player[] };
   actionPerformed: {
     action: "attack" | "shield" | "skip";
@@ -70,6 +71,27 @@ export class Game extends Emittery<GameEvent> {
     this.emit("gameStarted");
 
     this.setNextQuestion();
+  }
+
+  public togglePlayerReady(playerId: string): void {
+    const player = this.players.find((p) => p.id === playerId);
+    if (!player) {
+      throw new Error("Player not found");
+    }
+    player.isReady = !player.isReady;
+    this.emit("playersUpdated", this.players);
+
+    if (this.isAllPlayersReady() && this.players.length >= MIN_PLAYERS) {
+      logger.debug("All players are ready, starting game", {
+        lobbyId: this.lobbyId,
+        players: this.players,
+      });
+      this.start();
+    }
+  }
+
+  private isAllPlayersReady(): boolean {
+    return this.players.every((p) => p.isReady);
   }
 
   public setNextQuestion(): void {
@@ -220,6 +242,7 @@ export class Game extends Emittery<GameEvent> {
     if (this.players.some((player) => player.id === userId)) {
       throw new Error("Player already in game");
     }
+    // TODO: Move this logic to a factory
     const player: Player = {
       id: userId,
       name: playerName || "Player",
@@ -227,13 +250,10 @@ export class Game extends Emittery<GameEvent> {
       powerPoints: 0,
       shields: 0,
       skipNextQuestion: false,
+      isReady: false,
     };
     this.players.push(player);
     this.emit("playerJoined", player);
-
-    if (this.players.length >= MIN_PLAYERS) {
-      this.start();
-    }
   }
 
   public removePlayer(userId: UUID): void {
