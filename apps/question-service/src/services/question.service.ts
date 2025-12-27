@@ -3,7 +3,7 @@ import {
   QuestionProvider,
   type QuestionWithCorrectAnswer,
 } from "@repo/shared";
-import { QuestionTypes, getQuestions } from "open-trivia-db";
+import { QuestionDifficulties, QuestionTypes, getQuestions } from "open-trivia-db";
 import { injectable } from "tsyringe";
 import { logger } from "../logger.js";
 import { mapCategoryToOpenTDBCategory } from "../mappers/categoryMapper.js";
@@ -24,6 +24,7 @@ export class QuestionService {
         category: openTDBCategory,
         amount: count,
         type: QuestionTypes.Multiple,
+        difficulty: QuestionDifficulties.Easy,
       });
       logger.info("questions", { questions });
       return questions.map(mapOpenTDBQuestionToQuestion);
