@@ -112,10 +112,35 @@ export const useGameSocket = (lobbyId: string | null, playerName: string) => {
     setLobbyId,
   ]);
 
+  // Clear game state and close socket when leaving lobby
   useEffect(() => {
+    if (!lobbyId || !playerName) {
+      // Close socket if it exists
+      if (socket) {
+        socket.close();
+        setSocket(null);
+      }
+      // Clear all game state
+      setCurrentQuestion(null);
+      setPlayers([]);
+      setUserAnswerId(null);
+      setCorrectAnswerId(null);
+      setGameStatus("waiting");
+    }
+  }, [lobbyId, playerName, socket, setSocket, setCurrentQuestion, setPlayers, setUserAnswerId, setCorrectAnswerId, setGameStatus]);
+
+  // Connect to WebSocket when joining a lobby
+  useEffect(() => {
+    // Only connect if we have both lobbyId and playerName
+    if (!lobbyId || !playerName) {
+      return;
+    }
+
     const cleanup = connect();
-    return cleanup;
-  }, [connect]);
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [lobbyId, playerName, connect]);
 
   const sendAnswer = (questionId: string, answerId: string) => {
     if (socket && socket.readyState === WebSocket.OPEN) {

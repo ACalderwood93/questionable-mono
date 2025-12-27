@@ -13,6 +13,7 @@ import {
   correctAnswerIdAtom,
   currentQuestionAtom,
   errorAtom,
+  gameStatusAtom,
   lobbyIdAtom,
   playerNameAtom,
   playersAtom,
@@ -24,12 +25,13 @@ import { useGameSocket } from "./useGameSocket";
 function App() {
   const [lobbyId, setLobbyId] = useAtom(lobbyIdAtom);
   const [playerName, setPlayerName] = useAtom(playerNameAtom);
-  const [userId] = useAtom(userIdAtom);
-  const [currentQuestion] = useAtom(currentQuestionAtom);
-  const [players] = useAtom(playersAtom);
+  const [userId, setUserId] = useAtom(userIdAtom);
+  const [currentQuestion, setCurrentQuestion] = useAtom(currentQuestionAtom);
+  const [players, setPlayers] = useAtom(playersAtom);
   const [error, setError] = useAtom(errorAtom);
-  const [userAnswerId] = useAtom(userAnswerIdAtom);
-  const [correctAnswerId] = useAtom(correctAnswerIdAtom);
+  const [userAnswerId, setUserAnswerId] = useAtom(userAnswerIdAtom);
+  const [correctAnswerId, setCorrectAnswerId] = useAtom(correctAnswerIdAtom);
+  const [, setGameStatus] = useAtom(gameStatusAtom);
 
   const { sendAnswer, sendAction, sendToggleReady } = useGameSocket(lobbyId, playerName);
 
@@ -58,7 +60,15 @@ function App() {
   };
 
   const handleLeaveLobby = () => {
+    // Clear all game state when leaving lobby
     setLobbyId(null);
+    setCurrentQuestion(null);
+    setPlayers([]);
+    setUserAnswerId(null);
+    setCorrectAnswerId(null);
+    setUserId(null);
+    setGameStatus("waiting");
+    setError(null);
   };
 
   if (!lobbyId) {
@@ -69,8 +79,8 @@ function App() {
     <div className="max-w-6xl mx-auto px-4 md:px-8 bg-gray-900 text-white min-h-screen py-8">
       <GameHeader lobbyId={lobbyId} userId={userId} onLeave={handleLeaveLobby} />
 
-      <div className="flex flex-row flex-wrap gap-5 lg:gap-8 w-full">
-        <div className="flex-grow">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-8 w-full">
+        <div className="lg:col-span-2 min-w-0">
           {error && <ErrorMessage message={error} />}
 
           {!currentQuestion && (
@@ -82,19 +92,23 @@ function App() {
           )}
 
           {currentQuestion && (
-            <QuestionCard
-              question={currentQuestion}
-              userAnswerId={userAnswerId}
-              correctAnswerId={correctAnswerId}
-              onAnswer={sendAnswer}
-            />
+            <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+              <QuestionCard
+                question={currentQuestion}
+                userAnswerId={userAnswerId}
+                correctAnswerId={correctAnswerId}
+                onAnswer={sendAnswer}
+              />
+            </div>
           )}
         </div>
 
         {currentQuestion && (
-          <aside className="space-y-6 w-full lg:w-1/3">
-            <PlayerScoreboard players={players} currentUserId={userId} />
-            <ActionPanel players={players} currentUserId={userId} onAction={sendAction} />
+          <aside className="space-y-6 lg:col-span-1">
+            <div className="sticky top-4">
+              <PlayerScoreboard players={players} currentUserId={userId} />
+              <ActionPanel players={players} currentUserId={userId} onAction={sendAction} />
+            </div>
           </aside>
         )}
       </div>
