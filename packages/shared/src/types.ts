@@ -8,6 +8,19 @@ export type Question = {
   providedAnswers: Record<UUID, UUID>;
 };
 
+export type QuestionWithCorrectAnswer = Question & {
+  correctAnswer: UUID;
+};
+
+export enum QuestionCategory {
+  Games = "games",
+}
+
+export enum QuestionProvider {
+  OpenAI = "openai",
+  OpenTDB = "opentdb",
+}
+
 export type Answer = {
   id: UUID;
   text: string;

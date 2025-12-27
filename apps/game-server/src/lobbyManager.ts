@@ -1,7 +1,13 @@
-import type { UUID } from "@repo/shared";
+import type { Question, UUID } from "@repo/shared";
+import { QuestionCategory, QuestionProvider } from "@repo/shared";
 import type { WebSocket } from "ws";
-import { createAllQuestionsAndAnswers } from "./factories/questionFactory.js";
+import {
+  convertQuestionsFromService,
+  createAllQuestionsAndAnswers,
+} from "./factories/questionFactory.js";
 import { Game } from "./game.js";
+import { logger } from "./logger.js";
+import { QuestionServiceClient } from "./services/questionServiceClient.js";
 import { SocketConnector } from "./socketConnector.js";
 import type { Lobby } from "./types/Lobby.js";
 
@@ -11,7 +17,7 @@ export interface ILobbyManager {
     userId: UUID,
     playerName: string,
     socket: WebSocket
-  ): Lobby;
+  ): Promise<Lobby>;
   getLobby(lobbyId: string): Lobby | undefined;
   deleteLobby(lobbyId: string): void;
 }
@@ -25,8 +31,10 @@ It doesn't handle the game logic, that is handled by the Game class.
 export class LobbyManager implements ILobbyManager {
   private static instance: LobbyManager | undefined;
   private lobbies: Map<string, Lobby>;
+  private questionServiceClient: QuestionServiceClient;
   private constructor() {
     this.lobbies = new Map<string, Lobby>();
+    this.questionServiceClient = new QuestionServiceClient();
   }
   public static resetInstance(): void {
     LobbyManager.instance = undefined;
@@ -38,12 +46,12 @@ export class LobbyManager implements ILobbyManager {
     return LobbyManager.instance;
   }
 
-  public createLobbyOrAddUserToLobby(
+  public async createLobbyOrAddUserToLobby(
     lobbyId: string,
     userId: UUID,
     playerName: string,
     socket: WebSocket
-  ): Lobby {
+  ): Promise<Lobby> {
     const existingLobby = this.getLobby(lobbyId);
 
     if (existingLobby) {
@@ -52,7 +60,43 @@ export class LobbyManager implements ILobbyManager {
       return existingLobby;
     }
 
-    const [questions, answers] = createAllQuestionsAndAnswers(20);
+    // Get question configuration
+    const questionCount = 10;
+    const questionCategory = QuestionCategory.Games;
+    const questionProvider = QuestionProvider.OpenTDB;
+
+    let questions: Question[];
+    let answers: Map<UUID, UUID>;
+
+    try {
+      // Fetch questions from question service
+      logger.info("Fetching questions from question service", {
+        lobbyId,
+        category: questionCategory,
+        count: questionCount,
+        provider: questionProvider,
+      });
+
+      const questionsWithAnswers = await this.questionServiceClient.generateQuestions({
+        category: questionCategory,
+        count: questionCount,
+        provider: questionProvider,
+      });
+
+      [questions, answers] = convertQuestionsFromService(questionsWithAnswers);
+      logger.info("Successfully created questions from question service", {
+        lobbyId,
+        questionCount: questions.length,
+      });
+    } catch (error) {
+      // Fallback to hardcoded questions if question service fails
+      logger.error("Failed to fetch questions from question service, using fallback", {
+        lobbyId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      [questions, answers] = createAllQuestionsAndAnswers(questionCount);
+    }
+
     const game = new Game(crypto.randomUUID(), lobbyId, questions, answers);
     const socketConnector = new SocketConnector(game);
 

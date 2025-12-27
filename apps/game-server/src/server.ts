@@ -9,7 +9,7 @@ const wss = new WebSocketServer({ port });
 
 logger.info(`WebSocket server started on ws://localhost:${port}`);
 
-wss.on("connection", (ws, req: IncomingMessage) => {
+wss.on("connection", async (ws, req: IncomingMessage) => {
   logger.info("Client connected");
   try {
     // Parse URL search params
@@ -25,7 +25,12 @@ wss.on("connection", (ws, req: IncomingMessage) => {
     const playerName = searchParams.get("name") || "Player";
     const userId = crypto.randomUUID();
     const lobbyManager = LobbyManager.getInstance();
-    const lobby = lobbyManager.createLobbyOrAddUserToLobby(lobbyId, userId, playerName, ws);
+    const lobby = await lobbyManager.createLobbyOrAddUserToLobby(
+      lobbyId,
+      userId,
+      playerName,
+      ws
+    );
 
     if (!lobby.game) {
       logger.error(`No game found for lobby: ${lobbyId}`);

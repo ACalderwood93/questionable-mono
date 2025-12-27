@@ -1,7 +1,31 @@
-import type { UUID } from "@repo/shared";
+import type { UUID, Question, QuestionWithCorrectAnswer } from "@repo/shared";
 import { logger } from "../logger.js";
-import type { Question } from "../types/question.js";
 
+/**
+ * Converts QuestionWithCorrectAnswer[] from the question service
+ * to the format expected by the Game class (Question[] and Map<UUID, UUID>)
+ */
+export function convertQuestionsFromService(
+  questionsWithAnswers: QuestionWithCorrectAnswer[]
+): [Question[], Map<UUID, UUID>] {
+  const questions: Question[] = [];
+  const answers = new Map<UUID, UUID>();
+
+  for (const questionWithAnswer of questionsWithAnswers) {
+    const { correctAnswer, ...question } = questionWithAnswer;
+    questions.push(question);
+    answers.set(question.id, correctAnswer);
+
+    logger.debug("Question converted from service", {
+      questionId: question.id,
+      answerId: correctAnswer,
+    });
+  }
+
+  return [questions, answers];
+}
+
+// Legacy function kept for backwards compatibility or fallback
 function createQuestion(): [Question, UUID] {
   const parisId = crypto.randomUUID();
   return [
