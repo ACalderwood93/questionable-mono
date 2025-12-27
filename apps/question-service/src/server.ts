@@ -13,8 +13,8 @@ const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 3000;
 
 const app = createApp();
 
-// Start server
-const server = app.listen(port, () => {
+// Start server - bind to 0.0.0.0 to accept connections from other containers
+const server = app.listen(port, "0.0.0.0", () => {
   logger.info(`Question service started on port ${port}`, {
     port,
     nodeEnv: process.env.NODE_ENV || "development",
