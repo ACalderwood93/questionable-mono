@@ -25,12 +25,7 @@ wss.on("connection", async (ws, req: IncomingMessage) => {
     const playerName = searchParams.get("name") || "Player";
     const userId = crypto.randomUUID();
     const lobbyManager = LobbyManager.getInstance();
-    const lobby = await lobbyManager.createLobbyOrAddUserToLobby(
-      lobbyId,
-      userId,
-      playerName,
-      ws
-    );
+    const lobby = await lobbyManager.createLobbyOrAddUserToLobby(lobbyId, userId, playerName, ws);
 
     if (!lobby.game) {
       logger.error(`No game found for lobby: ${lobbyId}`);

@@ -1,4 +1,4 @@
-import type { UUID, Question, QuestionWithCorrectAnswer } from "@repo/shared";
+import type { Question, QuestionWithCorrectAnswer, UUID } from "@repo/shared";
 import { logger } from "../logger.js";
 
 /**

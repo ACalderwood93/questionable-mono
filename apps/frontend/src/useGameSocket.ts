@@ -133,7 +133,17 @@ export const useGameSocket = (lobbyId: string | null, playerName: string) => {
       setCorrectAnswerId(null);
       setGameStatus("waiting");
     }
-  }, [lobbyId, playerName, socket, setSocket, setCurrentQuestion, setPlayers, setUserAnswerId, setCorrectAnswerId, setGameStatus]);
+  }, [
+    lobbyId,
+    playerName,
+    socket,
+    setSocket,
+    setCurrentQuestion,
+    setPlayers,
+    setUserAnswerId,
+    setCorrectAnswerId,
+    setGameStatus,
+  ]);
 
   // Connect to WebSocket when joining a lobby
   useEffect(() => {

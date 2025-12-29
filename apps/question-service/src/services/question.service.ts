@@ -3,7 +3,7 @@ import {
   QuestionProvider,
   type QuestionWithCorrectAnswer,
 } from "@repo/shared";
-import { QuestionDifficulties, QuestionTypes, Session, getQuestions } from "open-trivia-db";
+import { QuestionTypes, Session, getQuestions } from "open-trivia-db";
 import { singleton } from "tsyringe";
 import { logger } from "../logger.js";
 import { mapCategoryToOpenTDBCategory } from "../mappers/categoryMapper.js";

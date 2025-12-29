@@ -1,12 +1,7 @@
-import type {
-  QuestionCategory,
-  QuestionProvider,
-  QuestionWithCorrectAnswer,
-} from "@repo/shared";
+import type { QuestionCategory, QuestionProvider, QuestionWithCorrectAnswer } from "@repo/shared";
 import { logger } from "../logger.js";
 
-const QUESTION_SERVICE_URL =
-  process.env.QUESTION_SERVICE_URL || "http://localhost:3000";
+const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL || "http://localhost:3000";
 
 export interface GenerateQuestionsRequest {
   category: QuestionCategory;
@@ -42,9 +37,7 @@ export class QuestionServiceClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(
-          `Question service returned ${response.status}: ${errorText}`
-        );
+        throw new Error(`Question service returned ${response.status}: ${errorText}`);
       }
 
       const data = (await response.json()) as GenerateQuestionsResponse;
@@ -62,4 +55,3 @@ export class QuestionServiceClient {
     }
   }
 }
-

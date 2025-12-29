@@ -1,7 +1,7 @@
 import type { Player, UUID } from "@repo/shared";
 import Emittery from "emittery";
-import { MAX_PLAYERS, MIN_PLAYERS } from "./constants.js";
 import { getConfig } from "./config.js";
+import { MAX_PLAYERS, MIN_PLAYERS } from "./constants.js";
 import { logger } from "./logger.js";
 import type { Question } from "./types/question.js";
 
@@ -371,7 +371,10 @@ export class Game extends Emittery<GameEvent> {
 
         // Also reduce target's power points as configured
         if (target.powerPoints > 0) {
-          const powerPointsLost = Math.min(config.powerUps.attack.powerPointsDrained, target.powerPoints);
+          const powerPointsLost = Math.min(
+            config.powerUps.attack.powerPointsDrained,
+            target.powerPoints
+          );
           target.powerPoints -= powerPointsLost;
           if (powerPointsLost > 0) {
             message += ` Lost ${powerPointsLost} power points!`;
@@ -414,7 +417,10 @@ export class Game extends Emittery<GameEvent> {
         target.skipNextQuestion = true;
         const config = getConfig();
         // Also reduce their power points as configured
-        const powerPointsLost = Math.min(config.powerUps.skip.powerPointsDrained, target.powerPoints);
+        const powerPointsLost = Math.min(
+          config.powerUps.skip.powerPointsDrained,
+          target.powerPoints
+        );
         target.powerPoints -= powerPointsLost;
 
         if (powerPointsLost > 0) {
