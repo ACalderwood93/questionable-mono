@@ -96,6 +96,10 @@ export class SocketConnector {
 
     this.game.on("gameFinished", () => {
       logger.info("Game finished", { lobbyId: this.game.lobbyId });
+      this.sendMessageToAllUsers({
+        type: "gameFinished",
+        players: this.game.players,
+      });
     });
 
     this.game.on("questionChanged", (question) => {
