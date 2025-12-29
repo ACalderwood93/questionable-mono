@@ -46,6 +46,7 @@ COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
 # Copy source files needed at runtime (if any)
 COPY --from=builder /app/apps/game-server/package.json ./apps/game-server/
+COPY --from=builder /app/apps/game-server/game-config.yml ./apps/game-server/game-config.yml
 
 # Set working directory to game-server
 WORKDIR /app/apps/game-server
