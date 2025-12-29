@@ -58,6 +58,12 @@ export function TitleScreen({ onJoin, error }: TitleScreenProps) {
                 required
               />
             </div>
+            <div className="mb-4">
+              <p className="text-sm text-gray-400 hover:text-gray-300">
+                Enter the lobby name of a game you want to join. If it doesn't already exist this
+                will create it for you.
+              </p>
+            </div>
             <button
               type="submit"
               className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-500 px-4 py-2 transition-all hover:scale-105"
