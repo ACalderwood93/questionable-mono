@@ -4,6 +4,7 @@ import {
   ActionPanel,
   ErrorMessage,
   GameHeader,
+  Leaderboard,
   PlayerScoreboard,
   QuestionCard,
   TitleScreen,
@@ -31,7 +32,7 @@ function App() {
   const [error, setError] = useAtom(errorAtom);
   const [userAnswerId, setUserAnswerId] = useAtom(userAnswerIdAtom);
   const [correctAnswerId, setCorrectAnswerId] = useAtom(correctAnswerIdAtom);
-  const [, setGameStatus] = useAtom(gameStatusAtom);
+  const [gameStatus, setGameStatus] = useAtom(gameStatusAtom);
 
   const { sendAnswer, sendAction, sendToggleReady } = useGameSocket(lobbyId, playerName);
 
@@ -73,6 +74,16 @@ function App() {
 
   if (!lobbyId) {
     return <TitleScreen onJoin={handleJoinLobby} error={error} />;
+  }
+
+  // Show leaderboard when game is finished
+  if (gameStatus === "finished") {
+    return (
+      <div className="max-w-6xl mx-auto px-4 md:px-8 bg-gray-900 text-white min-h-screen py-8">
+        <GameHeader lobbyId={lobbyId} userId={userId} onLeave={handleLeaveLobby} />
+        <Leaderboard players={players} currentUserId={userId} onLeave={handleLeaveLobby} />
+      </div>
+    );
   }
 
   return (

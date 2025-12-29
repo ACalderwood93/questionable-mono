@@ -3,6 +3,7 @@ export { ActionTargetModal } from "./ActionTargetModal";
 export { AnswerButton } from "./AnswerButton";
 export { ErrorMessage } from "./ErrorMessage";
 export { GameHeader } from "./GameHeader";
+export { Leaderboard } from "./Leaderboard";
 export { PlayerScoreboard } from "./PlayerScoreboard";
 export { QuestionCard } from "./QuestionCard";
 export { TitleScreen } from "./TitleScreen";
