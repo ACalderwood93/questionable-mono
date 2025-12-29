@@ -28,6 +28,11 @@ export function TitleScreen({ onJoin, error }: TitleScreenProps) {
         <section className="bg-gray-800 border-4 border-white p-6 max-w-lg mx-auto text-center">
           <h3 className="text-xl mb-4 border-b-2 border-white pb-2">Join a Lobby</h3>
           {error && <ErrorMessage message={error} size="small" />}
+
+          <p className="text-sm text-gray-400 hover:text-gray-300 mb-4">
+            Answer questions to earn PP. Spend PP to shield yourself, damage your opponents, or
+            force your opponents to skip the next question.
+          </p>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label htmlFor="player_name" className="block mb-2 text-sm">
@@ -59,7 +64,7 @@ export function TitleScreen({ onJoin, error }: TitleScreenProps) {
               />
             </div>
             <div className="mb-4">
-              <p className="text-sm text-gray-400 hover:text-gray-300">
+              <p className="text-xs text-gray-400 hover:text-gray-300">
                 Enter the lobby name of a game you want to join. If it doesn't already exist this
                 will create it for you.
               </p>
