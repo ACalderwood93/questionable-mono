@@ -20,7 +20,7 @@ export function TitleScreen({ onJoin, error }: TitleScreenProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gray-900 text-white">
       <div className="text-center animate-fadeIn w-full px-4">
-        <h1 className="mb-12 text-4xl flex flex-col items-center gap-4 animate-float">
+        <h1 className="mb-12 text-2xl md:text-4xl flex flex-col items-center gap-4 animate-float">
           <span className="text-6xl">🏆</span>
           <br />
           Questionable
