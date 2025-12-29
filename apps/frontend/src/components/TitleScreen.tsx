@@ -23,7 +23,7 @@ export function TitleScreen({ onJoin, error }: TitleScreenProps) {
         <h1 className="mb-12 text-2xl md:text-4xl flex flex-col items-center gap-4 animate-float">
           <span className="text-6xl">🏆</span>
           <br />
-          Questionable
+          Quiz Quest
         </h1>
         <section className="bg-gray-800 border-4 border-white p-6 max-w-lg mx-auto text-center">
           <h3 className="text-xl mb-4 border-b-2 border-white pb-2">Join a Lobby</h3>

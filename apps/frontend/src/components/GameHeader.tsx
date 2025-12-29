@@ -9,7 +9,7 @@ export function GameHeader({ lobbyId, userId, onLeave }: GameHeaderProps) {
     <header className="w-full flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8 border-b-4 border-white pb-4">
       <div>
         <h1 className="text-xl m-0 flex items-center gap-2">
-          <span>⭐</span> Questionable
+          <span>⭐</span> Quiz Quest
         </h1>
         <div className="flex flex-wrap gap-2.5 mt-2.5">
           <div className="bg-gray-700 text-white px-2 py-1 text-xs border-2 border-gray-600">
