@@ -11,3 +11,24 @@ export const socketAtom = atom<WebSocket | null>(null);
 export const errorAtom = atom<string | null>(null);
 export const userAnswerIdAtom = atom<UUID | null>(null);
 export const correctAnswerIdAtom = atom<UUID | null>(null);
+export const gameConfigAtom = atom<{
+  player: {
+    startingHealth: number;
+  };
+  powerUps: {
+    attack: {
+      cost: number;
+      baseDamage: number;
+      powerPointsDrained: number;
+      shieldDamageReduction: number;
+    };
+    shield: {
+      cost: number;
+      shieldsGained: number;
+    };
+    skip: {
+      cost: number;
+      powerPointsDrained: number;
+    };
+  };
+} | null>(null);

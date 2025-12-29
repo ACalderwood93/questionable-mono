@@ -32,7 +32,8 @@ export type OutgoingMessage =
   | ErrorMessage
   | PlayerUpdateMessage
   | AnswerRevealedMessage
-  | ActionResultMessage;
+  | ActionResultMessage
+  | GameConfigMessage;
 
 export type PlayerUpdateMessage = {
   type: "playerUpdate";
@@ -69,4 +70,29 @@ export type AskQuestionMessage = {
 export type ErrorMessage = {
   type: "error";
   error: string;
+};
+
+export type GameConfigMessage = {
+  type: "gameConfig";
+  config: {
+    player: {
+      startingHealth: number;
+    };
+    powerUps: {
+      attack: {
+        cost: number;
+        baseDamage: number;
+        powerPointsDrained: number;
+        shieldDamageReduction: number;
+      };
+      shield: {
+        cost: number;
+        shieldsGained: number;
+      };
+      skip: {
+        cost: number;
+        powerPointsDrained: number;
+      };
+    };
+  };
 };

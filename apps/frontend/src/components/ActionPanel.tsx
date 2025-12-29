@@ -1,5 +1,7 @@
 import type { Player, UUID } from "@repo/shared";
+import { useAtom } from "jotai";
 import { useState } from "react";
+import { gameConfigAtom } from "../store";
 import { ActionTargetModal } from "./ActionTargetModal";
 
 interface ActionPanelProps {
@@ -11,15 +13,23 @@ interface ActionPanelProps {
 export function ActionPanel({ players, currentUserId, onAction }: ActionPanelProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<"attack" | "skip" | null>(null);
+  const [gameConfig] = useAtom(gameConfigAtom);
 
   const currentPlayer = players.find((p) => p.id === currentUserId);
   const otherPlayers = players.filter((p) => p.id !== currentUserId && p.score > 0);
 
-  const ACTION_COSTS = {
-    attack: 15,
-    shield: 8,
-    skip: 20,
-  };
+  // Use config values if available, fallback to defaults
+  const ACTION_COSTS = gameConfig
+    ? {
+        attack: gameConfig.powerUps.attack.cost,
+        shield: gameConfig.powerUps.shield.cost,
+        skip: gameConfig.powerUps.skip.cost,
+      }
+    : {
+        attack: 15,
+        shield: 8,
+        skip: 20,
+      };
 
   const handleActionClick = (action: "attack" | "shield" | "skip") => {
     if (action === "shield") {
@@ -63,7 +73,10 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
             <span className="text-sm">⚔️ ATTACK</span>
             <span className="text-xs">Cost: {ACTION_COSTS.attack} PP</span>
           </div>
-          <p className="text-[0.5rem] mb-2 text-gray-400">Deals 30 damage + drains 5 PP</p>
+          <p className="text-[0.5rem] mb-2 text-gray-400">
+            Deals {gameConfig?.powerUps.attack.baseDamage ?? 30} damage + drains{" "}
+            {gameConfig?.powerUps.attack.powerPointsDrained ?? 5} PP
+          </p>
           <button
             type="button"
             className="w-full bg-red-600 hover:bg-red-700 text-white border-2 border-red-500 px-2 py-1 text-xs transition-all disabled:opacity-50"
@@ -80,7 +93,10 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
             <span className="text-sm">🛡️ SHIELD</span>
             <span className="text-xs">Cost: {ACTION_COSTS.shield} PP</span>
           </div>
-          <p className="text-[0.5rem] mb-2 text-gray-400">Gain 2 shields (10 dmg each)</p>
+          <p className="text-[0.5rem] mb-2 text-gray-400">
+            Gain {gameConfig?.powerUps.shield.shieldsGained ?? 2} shields (
+            {gameConfig?.powerUps.attack.shieldDamageReduction ?? 10} dmg each)
+          </p>
           <button
             type="button"
             className="w-full bg-yellow-600 hover:bg-yellow-700 text-white border-2 border-yellow-500 px-2 py-1 text-xs transition-all disabled:opacity-50"
@@ -97,7 +113,9 @@ export function ActionPanel({ players, currentUserId, onAction }: ActionPanelPro
             <span className="text-sm">⏭️ SKIP</span>
             <span className="text-xs">Cost: {ACTION_COSTS.skip} PP</span>
           </div>
-          <p className="text-[0.5rem] mb-2 text-gray-400">Skip next Q + drain 15 PP</p>
+          <p className="text-[0.5rem] mb-2 text-gray-400">
+            Skip next Q + drain {gameConfig?.powerUps.skip.powerPointsDrained ?? 15} PP
+          </p>
           <button
             type="button"
             className="w-full bg-purple-600 hover:bg-purple-700 text-white border-2 border-purple-500 px-2 py-1 text-xs transition-all disabled:opacity-50"

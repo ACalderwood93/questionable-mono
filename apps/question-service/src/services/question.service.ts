@@ -3,14 +3,19 @@ import {
   QuestionProvider,
   type QuestionWithCorrectAnswer,
 } from "@repo/shared";
-import { QuestionDifficulties, QuestionTypes, getQuestions } from "open-trivia-db";
-import { injectable } from "tsyringe";
+import { QuestionDifficulties, QuestionTypes, Session, getQuestions } from "open-trivia-db";
+import { singleton } from "tsyringe";
 import { logger } from "../logger.js";
 import { mapCategoryToOpenTDBCategory } from "../mappers/categoryMapper.js";
 import { mapOpenTDBQuestionToQuestion } from "../mappers/questionMapper.js";
 
-@injectable()
+@singleton()
 export class QuestionService {
+  private readonly session = new Session();
+
+  constructor() {
+    this.session.start();
+  }
   public async generateQuestions({
     category,
     count,
@@ -24,7 +29,7 @@ export class QuestionService {
         category: openTDBCategory,
         amount: count,
         type: QuestionTypes.Multiple,
-        difficulty: QuestionDifficulties.Easy,
+        session: this.session.token,
       });
       logger.info("questions", { questions });
       return questions.map(mapOpenTDBQuestionToQuestion);

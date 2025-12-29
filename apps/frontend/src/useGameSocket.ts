@@ -10,6 +10,7 @@ import {
   correctAnswerIdAtom,
   currentQuestionAtom,
   errorAtom,
+  gameConfigAtom,
   gameStatusAtom,
   lobbyIdAtom,
   playersAtom,
@@ -28,6 +29,7 @@ export const useGameSocket = (lobbyId: string | null, playerName: string) => {
   const [, setUserAnswerId] = useAtom(userAnswerIdAtom);
   const [, setCorrectAnswerId] = useAtom(correctAnswerIdAtom);
   const [, setLobbyId] = useAtom(lobbyIdAtom);
+  const [, setGameConfig] = useAtom(gameConfigAtom);
 
   const connect = useCallback(() => {
     if (!lobbyId || !playerName) return;
@@ -51,6 +53,9 @@ export const useGameSocket = (lobbyId: string | null, playerName: string) => {
         switch (message.type) {
           case "setUserId":
             setUserId(message.userId);
+            break;
+          case "gameConfig":
+            setGameConfig(message.config);
             break;
           case "askQuestion":
             setCurrentQuestion(message.question);
@@ -110,6 +115,7 @@ export const useGameSocket = (lobbyId: string | null, playerName: string) => {
     setUserAnswerId,
     setCorrectAnswerId,
     setLobbyId,
+    setGameConfig,
   ]);
 
   // Clear game state and close socket when leaving lobby

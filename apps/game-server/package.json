@@ -13,11 +13,13 @@
   "dependencies": {
     "@repo/shared": "workspace:*",
     "emittery": "^1.2.0",
+    "js-yaml": "^4.1.0",
     "winston": "^3.19.0",
     "ws": "^8.18.3",
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/ws": "^8.18.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",

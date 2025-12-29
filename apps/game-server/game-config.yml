@@ -1,0 +1,44 @@
+# Game Configuration
+# This file controls various game parameters
+
+# Player Configuration
+player:
+  # Starting health/score for each player
+  startingHealth: 100
+
+# Power Points Configuration
+powerPoints:
+  # Maximum power points awarded for answering quickly
+  max: 20
+  # Minimum power points awarded
+  min: 5
+  # Time threshold in seconds - answers over this time get minimum points
+  timeThreshold: 15
+
+# Power Up Configuration
+powerUps:
+  # Attack power up
+  attack:
+    cost: 15
+    baseDamage: 30
+    powerPointsDrained: 5
+    shieldDamageReduction: 10
+
+  # Shield power up
+  shield:
+    cost: 15
+    shieldsGained: 1
+
+  # Skip power up
+  skip:
+    cost: 20
+    powerPointsDrained: 30
+
+# Question Configuration
+questions:
+  # Number of questions per game
+  count: 30
+  # Question category (must match QuestionCategory enum values)
+  category: "games"
+  # Question provider (must match QuestionProvider enum values)
+  provider: "opentdb"

@@ -1,5 +1,6 @@
 import type { OutgoingMessage, UUID } from "@repo/shared";
 import type { WebSocket } from "ws";
+import { getConfig } from "./config.js";
 import type { Game } from "./game.js";
 import { logger } from "./logger.js";
 import type { IncomingMessageHandler } from "./messages/incoming/incomingMessageHandler.js";
@@ -51,6 +52,33 @@ export class SocketConnector {
       this.sendMessageToUser(player.id, {
         type: "setUserId",
         userId: player.id as UUID,
+      });
+
+      // Send game config to the newly joined player
+      const config = getConfig();
+      this.sendMessageToUser(player.id, {
+        type: "gameConfig",
+        config: {
+          player: {
+            startingHealth: config.player.startingHealth,
+          },
+          powerUps: {
+            attack: {
+              cost: config.powerUps.attack.cost,
+              baseDamage: config.powerUps.attack.baseDamage,
+              powerPointsDrained: config.powerUps.attack.powerPointsDrained,
+              shieldDamageReduction: config.powerUps.attack.shieldDamageReduction,
+            },
+            shield: {
+              cost: config.powerUps.shield.cost,
+              shieldsGained: config.powerUps.shield.shieldsGained,
+            },
+            skip: {
+              cost: config.powerUps.skip.cost,
+              powerPointsDrained: config.powerUps.skip.powerPointsDrained,
+            },
+          },
+        },
       });
 
       this.sendMessageToAllUsers({

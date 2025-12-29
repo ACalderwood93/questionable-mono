@@ -1,6 +1,7 @@
 import type { Player, UUID } from "@repo/shared";
 import Emittery from "emittery";
 import { MAX_PLAYERS, MIN_PLAYERS } from "./constants.js";
+import { getConfig } from "./config.js";
 import { logger } from "./logger.js";
 import type { Question } from "./types/question.js";
 
@@ -196,14 +197,16 @@ export class Game extends Emittery<GameEvent> {
       const timeTakenSeconds =
         (answerTime.getTime() - this.currentQuestionStartTime.getTime()) / 1000;
 
-      // Calculate power points: max 20, min 5
-      // Linear from 20 (at 0s) to 5 (at 15s)
-      // Anything over 15s gets 5 points
-      let powerPoints = 20;
-      if (timeTakenSeconds > 15) {
-        powerPoints = 5;
+      // Calculate power points based on config
+      const config = getConfig();
+      const { max, min, timeThreshold } = config.powerPoints;
+      // Linear from max (at 0s) to min (at timeThreshold)
+      // Anything over timeThreshold gets min points
+      let powerPoints = max;
+      if (timeTakenSeconds > timeThreshold) {
+        powerPoints = min;
       } else {
-        powerPoints = Math.max(5, 20 - timeTakenSeconds);
+        powerPoints = Math.max(min, max - timeTakenSeconds);
       }
 
       player.powerPoints += Math.round(powerPoints);
@@ -243,10 +246,11 @@ export class Game extends Emittery<GameEvent> {
       throw new Error("Player already in game");
     }
     // TODO: Move this logic to a factory
+    const config = getConfig();
     const player: Player = {
       id: userId,
       name: playerName || "Player",
-      score: 250, // Starting health
+      score: config.player.startingHealth,
       powerPoints: 0,
       shields: 0,
       skipNextQuestion: false,
@@ -272,11 +276,12 @@ export class Game extends Emittery<GameEvent> {
       throw new Error("Actor not found");
     }
 
-    // Action costs
+    const config = getConfig();
+    // Action costs from config
     const ACTION_COSTS = {
-      attack: 15,
-      shield: 8,
-      skip: 20,
+      attack: config.powerUps.attack.cost,
+      shield: config.powerUps.shield.cost,
+      skip: config.powerUps.skip.cost,
     };
 
     const cost = ACTION_COSTS[action];
@@ -346,15 +351,16 @@ export class Game extends Emittery<GameEvent> {
         if (!target) {
           throw new Error("Target not found");
         }
-        const baseDamage = 30; // Increased from 15 for more impact
+        const config = getConfig();
+        const baseDamage = config.powerUps.attack.baseDamage;
         let actualDamage = baseDamage;
         let shieldsUsed = 0;
 
-        // Shields reduce damage significantly
+        // Shields reduce damage based on config
         while (target.shields > 0 && actualDamage > 0) {
           target.shields--;
           shieldsUsed++;
-          actualDamage = Math.max(0, actualDamage - 10); // Each shield reduces damage by 10
+          actualDamage = Math.max(0, actualDamage - config.powerUps.attack.shieldDamageReduction);
         }
 
         if (shieldsUsed > 0) {
@@ -363,9 +369,9 @@ export class Game extends Emittery<GameEvent> {
           message = `${target.name} took ${actualDamage} damage!`;
         }
 
-        // Also reduce target's power points by 5 as a bonus effect
+        // Also reduce target's power points as configured
         if (target.powerPoints > 0) {
-          const powerPointsLost = Math.min(5, target.powerPoints);
+          const powerPointsLost = Math.min(config.powerUps.attack.powerPointsDrained, target.powerPoints);
           target.powerPoints -= powerPointsLost;
           if (powerPointsLost > 0) {
             message += ` Lost ${powerPointsLost} power points!`;
@@ -389,9 +395,10 @@ export class Game extends Emittery<GameEvent> {
       }
 
       case "shield": {
-        // Gain 2 shields for more impact
-        actor.shields += 2;
-        message = `${actor.name} gained 2 shields! (Total: ${actor.shields})`;
+        const config = getConfig();
+        const shieldsGained = config.powerUps.shield.shieldsGained;
+        actor.shields += shieldsGained;
+        message = `${actor.name} gained ${shieldsGained} shield${shieldsGained > 1 ? "s" : ""}! (Total: ${actor.shields})`;
         logger.debug("Shield gained", {
           actorId,
           newShields: actor.shields,
@@ -405,8 +412,9 @@ export class Game extends Emittery<GameEvent> {
           throw new Error("Target not found");
         }
         target.skipNextQuestion = true;
-        // Also reduce their power points significantly as a strategic hit
-        const powerPointsLost = Math.min(15, target.powerPoints);
+        const config = getConfig();
+        // Also reduce their power points as configured
+        const powerPointsLost = Math.min(config.powerUps.skip.powerPointsDrained, target.powerPoints);
         target.powerPoints -= powerPointsLost;
 
         if (powerPointsLost > 0) {
