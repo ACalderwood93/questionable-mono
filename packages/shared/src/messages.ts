@@ -33,7 +33,8 @@ export type OutgoingMessage =
   | PlayerUpdateMessage
   | AnswerRevealedMessage
   | ActionResultMessage
-  | GameConfigMessage;
+  | GameConfigMessage
+  | GameFinishedMessage;
 
 export type PlayerUpdateMessage = {
   type: "playerUpdate";
@@ -95,4 +96,9 @@ export type GameConfigMessage = {
       };
     };
   };
+};
+
+export type GameFinishedMessage = {
+  type: "gameFinished";
+  players: import("./types.js").Player[];
 };

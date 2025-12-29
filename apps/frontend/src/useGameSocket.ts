@@ -80,6 +80,11 @@ export const useGameSocket = (lobbyId: string | null, playerName: string) => {
               setError(message.message);
             }
             break;
+          case "gameFinished":
+            setPlayers(message.players);
+            setGameStatus("finished");
+            setCurrentQuestion(null);
+            break;
           case "error":
             setError(message.error);
             setLobbyId(null);
