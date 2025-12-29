@@ -37,7 +37,7 @@ powerUps:
 # Question Configuration
 questions:
   # Number of questions per game
-  count: 1
+  count: 30
   # Question category (must match QuestionCategory enum values)
   category: "games"
   # Question provider (must match QuestionProvider enum values)
