@@ -1,6 +1,6 @@
-import type { Question, UUID } from "@repo/shared";
-import { QuestionCategory, QuestionProvider } from "@repo/shared";
+import type { Question, QuestionCategory, QuestionProvider, UUID } from "@repo/shared";
 import type { WebSocket } from "ws";
+import { getConfig } from "./config.js";
 import {
   convertQuestionsFromService,
   createAllQuestionsAndAnswers,
@@ -60,10 +60,11 @@ export class LobbyManager implements ILobbyManager {
       return existingLobby;
     }
 
-    // Get question configuration
-    const questionCount = 10;
-    const questionCategory = QuestionCategory.Games;
-    const questionProvider = QuestionProvider.OpenTDB;
+    // Get question configuration from config file
+    const config = getConfig();
+    const questionCount = config.questions.count;
+    const questionCategory = config.questions.category as QuestionCategory;
+    const questionProvider = config.questions.provider as QuestionProvider;
 
     let questions: Question[];
     let answers: Map<UUID, UUID>;
