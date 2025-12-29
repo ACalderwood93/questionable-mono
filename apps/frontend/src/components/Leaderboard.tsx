@@ -29,26 +29,22 @@ export function Leaderboard({ players, currentUserId, onLeave }: LeaderboardProp
           GAME OVER
         </h2>
         <h3 className="text-2xl mb-6 text-center">FINAL LEADERBOARD</h3>
-        
+
         <div className="space-y-4">
           {sortedPlayers.map((player, index) => {
             const isCurrentUser = player.id === currentUserId;
             const isEliminated = player.score <= 0;
-            
+
             return (
               <div
                 key={player.id}
                 className={`border-2 border-white p-4 ${
-                  isCurrentUser
-                    ? "bg-blue-900 border-blue-400 border-4"
-                    : "bg-gray-700"
+                  isCurrentUser ? "bg-blue-900 border-blue-400 border-4" : "bg-gray-700"
                 } ${isEliminated ? "opacity-60" : ""}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
-                    <span className="text-2xl font-bold min-w-[3rem]">
-                      {getRankEmoji(index)}
-                    </span>
+                    <span className="text-2xl font-bold min-w-[3rem]">{getRankEmoji(index)}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-xl font-bold">
@@ -59,13 +55,11 @@ export function Leaderboard({ players, currentUserId, onLeave }: LeaderboardProp
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-6 text-right">
                     <div>
                       <div className="text-sm text-gray-300">HP</div>
-                      <div className="text-xl font-bold">
-                        {isEliminated ? "0" : player.score}
-                      </div>
+                      <div className="text-xl font-bold">{isEliminated ? "0" : player.score}</div>
                     </div>
                     <div>
                       <div className="text-sm text-gray-300">PP</div>
@@ -80,6 +74,7 @@ export function Leaderboard({ players, currentUserId, onLeave }: LeaderboardProp
 
         <div className="mt-8 text-center">
           <button
+            type="button"
             onClick={onLeave}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 border-2 border-white text-lg transition-colors"
           >
@@ -90,4 +85,3 @@ export function Leaderboard({ players, currentUserId, onLeave }: LeaderboardProp
     </div>
   );
 }
-
