@@ -3,18 +3,13 @@ import {
   QuestionProvider,
   type QuestionWithCorrectAnswer,
 } from "@repo/shared";
-import { QuestionTypes, Session, getQuestions } from "open-trivia-db";
-import { singleton } from "tsyringe";
+import { QuestionTypes, getQuestions } from "open-trivia-db";
+import { injectable } from "tsyringe";
 import { logger } from "../logger.js";
 import { mapOpenTDBQuestionToQuestion } from "../mappers/questionMapper.js";
 
-@singleton()
+@injectable()
 export class QuestionService {
-  private readonly session = new Session();
-
-  constructor() {
-    this.session.start();
-  }
   public async generateQuestions({
     count,
     provider,
@@ -25,7 +20,6 @@ export class QuestionService {
       const questions = await getQuestions({
         amount: count,
         type: QuestionTypes.Multiple,
-        session: this.session.token,
       });
       logger.info("questions", { questions });
       return questions.map(mapOpenTDBQuestionToQuestion);
